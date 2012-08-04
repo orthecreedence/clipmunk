@@ -1,11 +1,14 @@
 (defpackage #:clipmunk
-  (:use :cl :cffi))
-
-(defpackage #:clipmunk.bindings
-  (:use :cl :cffi))
+  (:use :cl :cffi)
+  (:nicknames :cp))
 
 (defpackage #:clipmunk.accessors
-  (:use :cl :cffi :clipmunk.bindings))
+  (:use :cl :cffi :clipmunk)
+  (:nicknames :cp-a))
+
+(defpackage #:clipmunk.ffi
+  (:use :cl :cffi :clipmunk)
+  (:nicknames :cp-f))
 
 (in-package :clipmunk)
 

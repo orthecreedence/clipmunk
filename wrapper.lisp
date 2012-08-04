@@ -1,4 +1,4 @@
-(in-package :clipmunk.bindings)
+(in-package :clipmunk)
 
 (cl:defmacro defanonenum (&body enums)
    "Converts anonymous enums to defconstants."

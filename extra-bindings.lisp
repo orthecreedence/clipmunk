@@ -1,4 +1,4 @@
-(in-package :clipmunk.bindings)
+(in-package :clipmunk)
 
 (cffi:defcfun ("cpMomentForCircle" #.(chipmunk-lispify "cpMomentForCircle" 'function)) :double
   (m :double)

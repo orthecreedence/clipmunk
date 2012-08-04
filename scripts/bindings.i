@@ -3,7 +3,7 @@
 %feature("intern_function", "chipmunk-lispify");
 
 %insert("lisphead") %{
-(in-package :clipmunk.bindings)
+(in-package :clipmunk)
 %}
 
 //  ignored 
@@ -91,17 +91,17 @@
 %include "/usr/local/include/chipmunk/chipmunk_types.h"
 %include "/usr/local/include/chipmunk/cpVect.h"
 %include "/usr/local/include/chipmunk/cpBB.h"
-%include "/usr/local/include/chipmunk/cpArray.h"
-%include "/usr/local/include/chipmunk/cpHashSet.h"
-%include "/usr/local/include/chipmunk/cpSpaceHash.h"
+/*%include "/usr/local/include/chipmunk/cpArray.h"*/
+/*%include "/usr/local/include/chipmunk/cpHashSet.h"*/
+/*%include "/usr/local/include/chipmunk/cpSpaceHash.h"*/
 
 %include "/usr/local/include/chipmunk/cpBody.h"
 %include "/usr/local/include/chipmunk/cpShape.h"
 %include "/usr/local/include/chipmunk/cpPolyShape.h"
 
 %include "/usr/local/include/chipmunk/cpArbiter.h"
-%include "/usr/local/include/chipmunk/cpCollision.h"
-	
+/*%include "/usr/local/include/chipmunk/cpCollision.h"*/
+
 %include "/usr/local/include/chipmunk/constraints/cpConstraint.h"
 
 %include "/usr/local/include/chipmunk/cpSpace.h"
