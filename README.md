@@ -1,39 +1,60 @@
 CLIPMUNK
 ========
+This is a fork of the [Clipmunk github project from fred-o](https://github.com/fred-o/clipmunk).
+I decided to fork to support the newer versions of the Chipmunk library (current bindings are
+generated for version 6.1.1).
 
-CLIPMUNK provides Common Lisp [CFFI][cffi] bindings for the
-[Chipmunk Physics][chipmunk] library. It began as a fork of
-[Ralith's cl-chipmunk][cl-chipmunk] library, but after a while I got
-tired of writing the `defcfun`s by hand and switched to using
-[SWIG][swig] to generate the bindings automatically.
+Usage
+-----
+This fork is not in quicklisp (as far as I know) so download it to your asdf folder before trying
+to use it. Once loaded, it follows the following conventions:
 
-Installation
-------------
+ - Prefix is ommitted (`cpSpaceNew` becomes `SpaceNew`)
+ - Words are split by dashes: `SpaceNew` becomes `space-new`
+ - Package is nicknamed "cp", so `cpSpaceNew` is `cp:space-new`
 
-TBA
+So `cpCircleShapeNew` becomes in its final form `cp:circle-shape-new`.
 
-Limitations
------------
+You can access just about any of the functions in the Chipmunk library via this scheme.
 
-Some of the functions in the [Chipmunk API][api] depend on getting
-struct arguments passed by value, but this is not possible with
-[CFFI][cffi]. There is a workaround for this, however: we can pass
-each element in the struct as a separate argument to the function, as
-long as they are passed in the correct order. Since the most
-frequently used struct (`cpVect`) is a fairly simple one, consisting
-of just two double floats, it is quite easy to adjust the generated
-bindings to accomodate this.
+### cpVect
+Many of the places in the code take a `cpVect` passed by value as an argument. CFFI doesn't *like*
+objects being passed by value, so the workaround is that whenever this happens in the bindings,
+instead of
 
-This approach seems to work nicely, at least on x86-based platforms.
+    (cp:segment-shape-new body-ptr vect1 vect2 radius)
 
-Testing
--------
+you do
 
-CLIPMUNK is being developed and tested on SBCL running on Linux and
-OSX. 
+    (cp:segment-shape-new body-ptr vect1-x vect1-y vect2-x vect2-y radius)
 
-[chipmunk]:http://code.google.com/p/chipmunk-physics
-[cl-chipmunk]:https://github.com/Ralith/cl-chipmunk/tree/
-[swig]:http://swig.org
-[api]:http://files.slembcke.net/chipmunk/release/ChipmunkLatest-Docs/#ChipmunkCAPI
-[cffi]:http://common-lisp.net/project/cffi/
+...works well, and C sees the two as nearly identical, at least on x86 systems.
+
+### Accessors
+Accessors are done in a different package, but separated in much the same way:
+
+ - `space->static_body` becomes `(cp-a:space-static-body space)`
+
+Accessors are setfable.
+
+FFI
+---
+Chipmunk provides a header file (when compiled with `-DCHIPMUNK_FFI`) that defines a set of pointer
+functions to accessors. Please see [chipmunk_ffi.h](https://github.com/slembcke/Chipmunk-Physics/blob/master/include/chipmunk/chipmunk_ffi.h)
+for the full listing:
+
+    _cpSpaceStaticBody    // a global variable holding a pointer to the function cpSpaceStaticBody
+
+Access directly with:
+
+    (cffi:foreign-funcall-pointer (cffi:mem-aref (cffi:foreign-symbol-pointer "_cpSpaceStaticBody") :pointer) () :pointer space-ptr :pointer)
+
+These functions are not *currently* supported by the bindings, but their addition is planned under
+another package in the near future. Their inclusion makes accessing some of the chipmunk funcionality
+a bit easier, and although they are not necessary, may be nice to have.
+
+Notes
+-----
+Please note that, as mentioned, I am *not* the original author of these bindings. I have made many
+modifications to keep the bindings (*and* their generation script) in sync with the latest Chipmunk,
+but the bulk of the work still goes to [fred-o](https://github.com/fred-o). Thanks!
