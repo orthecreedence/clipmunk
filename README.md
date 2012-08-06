@@ -43,11 +43,11 @@ Chipmunk provides a header file (when compiled with `-DCHIPMUNK_FFI`) that defin
 functions to accessors. Please see [chipmunk_ffi.h](https://github.com/slembcke/Chipmunk-Physics/blob/master/include/chipmunk/chipmunk_ffi.h)
 for the full listing:
 
-    _cpSpaceStaticBody    // a global variable holding a pointer to the function cpSpaceStaticBody
+    _cpBodyIsSleeping    // a global variable holding a pointer to the function cpBodyIsSleeping
 
 Access directly with:
 
-    (cffi:foreign-funcall-pointer (cffi:mem-aref (cffi:foreign-symbol-pointer "_cpSpaceStaticBody") :pointer) () :pointer space-ptr :pointer)
+    (cffi:foreign-funcall-pointer (cffi:mem-aref (cffi:foreign-symbol-pointer "_cpBodyIsSleeping") :pointer) () :pointer body-ptr :int)
 
 These functions are not *currently* supported by the bindings, but their addition is planned under
 another package in the near future. Their inclusion makes accessing some of the chipmunk funcionality
