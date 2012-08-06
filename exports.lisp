@@ -146,7 +146,6 @@
 (cl:export '#.(chipmunk-lispify "cpSpaceNew" 'function))
 (cl:export '#.(chipmunk-lispify "cpSpaceDestroy" 'function))
 (cl:export '#.(chipmunk-lispify "cpSpaceFree" 'function))
-(cl:export '#.(chipmunk-lispify "cpSpaceFreeChildren" 'function))
 (cl:export '#.(chipmunk-lispify "cpSpaceSetDefaultCollisionHandler" 'function))
 (cl:export '#.(chipmunk-lispify "cpSpaceAddCollisionHandler" 'function))
 (cl:export '#.(chipmunk-lispify "cpSpaceRemoveCollisionHandler" 'function))
