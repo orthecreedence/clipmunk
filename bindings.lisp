@@ -661,10 +661,93 @@
   (arb :pointer)
   (i :int))
 
+(cffi:defcstruct #.(chipmunk-lispify "cpConstraintClass" 'classname)
+	(#.(chipmunk-lispify "preStep" 'slotname) :pointer)
+	(#.(chipmunk-lispify "applyCachedImpulse" 'slotname) :pointer)
+	(#.(chipmunk-lispify "applyImpulse" 'slotname) :pointer)
+	(#.(chipmunk-lispify "getImpulse" 'slotname) :pointer))
+
+(cffi:defcstruct #.(chipmunk-lispify "cpConstraint" 'classname)
+	(#.(chipmunk-lispify "klass_private" 'slotname) :pointer)
+	(#.(chipmunk-lispify "a" 'slotname) :pointer)
+	(#.(chipmunk-lispify "b" 'slotname) :pointer)
+	(#.(chipmunk-lispify "space_private" 'slotname) :pointer)
+	(#.(chipmunk-lispify "next_a_private" 'slotname) :pointer)
+	(#.(chipmunk-lispify "next_b_private" 'slotname) :pointer)
+	(#.(chipmunk-lispify "maxForce" 'slotname) :double)
+	(#.(chipmunk-lispify "errorBias" 'slotname) :double)
+	(#.(chipmunk-lispify "maxBias" 'slotname) :double)
+	(#.(chipmunk-lispify "preSolve" 'slotname) :pointer)
+	(#.(chipmunk-lispify "postSolve" 'slotname) :pointer)
+	(#.(chipmunk-lispify "data" 'slotname) :pointer))
+
+(cffi:defcfun ("cpConstraintDestroy" #.(chipmunk-lispify "cpConstraintDestroy" 'function)) :void
+  (constraint :pointer))
+
+(cffi:defcfun ("cpConstraintFree" #.(chipmunk-lispify "cpConstraintFree" 'function)) :void
+  (constraint :pointer))
+
+(cffi:defcfun ("cpConstraintActivateBodies" #.(chipmunk-lispify "cpConstraintActivateBodies" 'function)) :void
+  (constraint :pointer))
+
+(cffi:defcfun ("cpConstraintGetSpace" #.(chipmunk-lispify "cpConstraintGetSpace" 'function)) :pointer
+  (constraint :pointer))
+
+(cffi:defcfun ("cpConstraintGetA" #.(chipmunk-lispify "cpConstraintGetA" 'function)) :pointer
+  (constraint :pointer))
+
+(cffi:defcfun ("cpConstraintGetB" #.(chipmunk-lispify "cpConstraintGetB" 'function)) :pointer
+  (constraint :pointer))
+
+(cffi:defcfun ("cpConstraintGetMaxForce" #.(chipmunk-lispify "cpConstraintGetMaxForce" 'function)) :double
+  (constraint :pointer))
+
+(cffi:defcfun ("cpConstraintSetMaxForce" #.(chipmunk-lispify "cpConstraintSetMaxForce" 'function)) :void
+  (constraint :pointer)
+  (value :double))
+
+(cffi:defcfun ("cpConstraintGetErrorBias" #.(chipmunk-lispify "cpConstraintGetErrorBias" 'function)) :double
+  (constraint :pointer))
+
+(cffi:defcfun ("cpConstraintSetErrorBias" #.(chipmunk-lispify "cpConstraintSetErrorBias" 'function)) :void
+  (constraint :pointer)
+  (value :double))
+
+(cffi:defcfun ("cpConstraintGetMaxBias" #.(chipmunk-lispify "cpConstraintGetMaxBias" 'function)) :double
+  (constraint :pointer))
+
+(cffi:defcfun ("cpConstraintSetMaxBias" #.(chipmunk-lispify "cpConstraintSetMaxBias" 'function)) :void
+  (constraint :pointer)
+  (value :double))
+
+(cffi:defcfun ("cpConstraintGetPreSolveFunc" #.(chipmunk-lispify "cpConstraintGetPreSolveFunc" 'function)) :pointer
+  (constraint :pointer))
+
+(cffi:defcfun ("cpConstraintSetPreSolveFunc" #.(chipmunk-lispify "cpConstraintSetPreSolveFunc" 'function)) :void
+  (constraint :pointer)
+  (value :pointer))
+
+(cffi:defcfun ("cpConstraintGetPostSolveFunc" #.(chipmunk-lispify "cpConstraintGetPostSolveFunc" 'function)) :pointer
+  (constraint :pointer))
+
+(cffi:defcfun ("cpConstraintSetPostSolveFunc" #.(chipmunk-lispify "cpConstraintSetPostSolveFunc" 'function)) :void
+  (constraint :pointer)
+  (value :pointer))
+
+(cffi:defcfun ("cpConstraintGetUserData" #.(chipmunk-lispify "cpConstraintGetUserData" 'function)) :pointer
+  (constraint :pointer))
+
+(cffi:defcfun ("cpConstraintSetUserData" #.(chipmunk-lispify "cpConstraintSetUserData" 'function)) :void
+  (constraint :pointer)
+  (value :pointer))
+
+(cffi:defcfun ("cpConstraintGetImpulse" #.(chipmunk-lispify "cpConstraintGetImpulse" 'function)) :double
+  (constraint :pointer))
+
 (cffi:defcfun ("cpDampedRotarySpringGetClass" #.(chipmunk-lispify "cpDampedRotarySpringGetClass" 'function)) :pointer)
 
 (cffi:defcstruct #.(chipmunk-lispify "cpDampedRotarySpring" 'classname)
-	(#.(chipmunk-lispify "constraint" 'slotname) :pointer)
+	(#.(chipmunk-lispify "constraint" 'slotname) #.(chipmunk-lispify "cpConstraint" 'classname))
 	(#.(chipmunk-lispify "restAngle" 'slotname) :double)
 	(#.(chipmunk-lispify "stiffness" 'slotname) :double)
 	(#.(chipmunk-lispify "damping" 'slotname) :double)
@@ -690,10 +773,38 @@
   (stiffness :double)
   (damping :double))
 
+(cffi:defcfun ("cpDampedRotarySpringGetRestAngle" #.(chipmunk-lispify "cpDampedRotarySpringGetRestAngle" 'function)) :double
+  (constraint :pointer))
+
+(cffi:defcfun ("cpDampedRotarySpringSetRestAngle" #.(chipmunk-lispify "cpDampedRotarySpringSetRestAngle" 'function)) :void
+  (constraint :pointer)
+  (value :double))
+
+(cffi:defcfun ("cpDampedRotarySpringGetStiffness" #.(chipmunk-lispify "cpDampedRotarySpringGetStiffness" 'function)) :double
+  (constraint :pointer))
+
+(cffi:defcfun ("cpDampedRotarySpringSetStiffness" #.(chipmunk-lispify "cpDampedRotarySpringSetStiffness" 'function)) :void
+  (constraint :pointer)
+  (value :double))
+
+(cffi:defcfun ("cpDampedRotarySpringGetDamping" #.(chipmunk-lispify "cpDampedRotarySpringGetDamping" 'function)) :double
+  (constraint :pointer))
+
+(cffi:defcfun ("cpDampedRotarySpringSetDamping" #.(chipmunk-lispify "cpDampedRotarySpringSetDamping" 'function)) :void
+  (constraint :pointer)
+  (value :double))
+
+(cffi:defcfun ("cpDampedRotarySpringGetSpringTorqueFunc" #.(chipmunk-lispify "cpDampedRotarySpringGetSpringTorqueFunc" 'function)) :pointer
+  (constraint :pointer))
+
+(cffi:defcfun ("cpDampedRotarySpringSetSpringTorqueFunc" #.(chipmunk-lispify "cpDampedRotarySpringSetSpringTorqueFunc" 'function)) :void
+  (constraint :pointer)
+  (value :pointer))
+
 (cffi:defcfun ("cpDampedSpringGetClass" #.(chipmunk-lispify "cpDampedSpringGetClass" 'function)) :pointer)
 
 (cffi:defcstruct #.(chipmunk-lispify "cpDampedSpring" 'classname)
-	(#.(chipmunk-lispify "constraint" 'slotname) :pointer)
+	(#.(chipmunk-lispify "constraint" 'slotname) #.(chipmunk-lispify "cpConstraint" 'classname))
 	(anchr1-x :double) (anchr1-y :double)
 	(anchr2-x :double) (anchr2-y :double)
 	(#.(chipmunk-lispify "restLength" 'slotname) :double)
@@ -728,10 +839,52 @@
   (stiffness :double)
   (damping :double))
 
+(cffi:defcfun ("cpDampedSpringGetAnchr1" #.(chipmunk-lispify "cpDampedSpringGetAnchr1" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
+  (constraint :pointer))
+
+(cffi:defcfun ("cpDampedSpringSetAnchr1" #.(chipmunk-lispify "cpDampedSpringSetAnchr1" 'function)) :void
+  (constraint :pointer)
+  (value-x :double) (value-y :double))
+
+(cffi:defcfun ("cpDampedSpringGetAnchr2" #.(chipmunk-lispify "cpDampedSpringGetAnchr2" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
+  (constraint :pointer))
+
+(cffi:defcfun ("cpDampedSpringSetAnchr2" #.(chipmunk-lispify "cpDampedSpringSetAnchr2" 'function)) :void
+  (constraint :pointer)
+  (value-x :double) (value-y :double))
+
+(cffi:defcfun ("cpDampedSpringGetRestLength" #.(chipmunk-lispify "cpDampedSpringGetRestLength" 'function)) :double
+  (constraint :pointer))
+
+(cffi:defcfun ("cpDampedSpringSetRestLength" #.(chipmunk-lispify "cpDampedSpringSetRestLength" 'function)) :void
+  (constraint :pointer)
+  (value :double))
+
+(cffi:defcfun ("cpDampedSpringGetStiffness" #.(chipmunk-lispify "cpDampedSpringGetStiffness" 'function)) :double
+  (constraint :pointer))
+
+(cffi:defcfun ("cpDampedSpringSetStiffness" #.(chipmunk-lispify "cpDampedSpringSetStiffness" 'function)) :void
+  (constraint :pointer)
+  (value :double))
+
+(cffi:defcfun ("cpDampedSpringGetDamping" #.(chipmunk-lispify "cpDampedSpringGetDamping" 'function)) :double
+  (constraint :pointer))
+
+(cffi:defcfun ("cpDampedSpringSetDamping" #.(chipmunk-lispify "cpDampedSpringSetDamping" 'function)) :void
+  (constraint :pointer)
+  (value :double))
+
+(cffi:defcfun ("cpDampedSpringGetSpringForceFunc" #.(chipmunk-lispify "cpDampedSpringGetSpringForceFunc" 'function)) :pointer
+  (constraint :pointer))
+
+(cffi:defcfun ("cpDampedSpringSetSpringForceFunc" #.(chipmunk-lispify "cpDampedSpringSetSpringForceFunc" 'function)) :void
+  (constraint :pointer)
+  (value :pointer))
+
 (cffi:defcfun ("cpGearJointGetClass" #.(chipmunk-lispify "cpGearJointGetClass" 'function)) :pointer)
 
 (cffi:defcstruct #.(chipmunk-lispify "cpGearJoint" 'classname)
-	(#.(chipmunk-lispify "constraint" 'slotname) :pointer)
+	(#.(chipmunk-lispify "constraint" 'slotname) #.(chipmunk-lispify "cpConstraint" 'classname))
 	(#.(chipmunk-lispify "phase" 'slotname) :double)
 	(#.(chipmunk-lispify "ratio" 'slotname) :double)
 	(#.(chipmunk-lispify "ratio_inv" 'slotname) :double)
@@ -755,6 +908,16 @@
   (phase :double)
   (ratio :double))
 
+(cffi:defcfun ("cpGearJointGetPhase" #.(chipmunk-lispify "cpGearJointGetPhase" 'function)) :double
+  (constraint :pointer))
+
+(cffi:defcfun ("cpGearJointSetPhase" #.(chipmunk-lispify "cpGearJointSetPhase" 'function)) :void
+  (constraint :pointer)
+  (value :double))
+
+(cffi:defcfun ("cpGearJointGetRatio" #.(chipmunk-lispify "cpGearJointGetRatio" 'function)) :double
+  (constraint :pointer))
+
 (cffi:defcfun ("cpGearJointSetRatio" #.(chipmunk-lispify "cpGearJointSetRatio" 'function)) :void
   (constraint :pointer)
   (value :double))
@@ -762,7 +925,7 @@
 (cffi:defcfun ("cpGrooveJointGetClass" #.(chipmunk-lispify "cpGrooveJointGetClass" 'function)) :pointer)
 
 (cffi:defcstruct #.(chipmunk-lispify "cpGrooveJoint" 'classname)
-	(#.(chipmunk-lispify "constraint" 'slotname) :pointer)
+	(#.(chipmunk-lispify "constraint" 'slotname) #.(chipmunk-lispify "cpConstraint" 'classname))
 	(grv_n-x :double) (grv_n-y :double)
 	(grv_a-x :double) (grv_a-y :double)
 	(grv_b-x :double) (grv_b-y :double)
@@ -794,18 +957,31 @@
   (groove_b-x :double) (groove_b-y :double)
   (anchr2-x :double) (anchr2-y :double))
 
+(cffi:defcfun ("cpGrooveJointGetGrooveA" #.(chipmunk-lispify "cpGrooveJointGetGrooveA" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
+  (constraint :pointer))
+
 (cffi:defcfun ("cpGrooveJointSetGrooveA" #.(chipmunk-lispify "cpGrooveJointSetGrooveA" 'function)) :void
   (constraint :pointer)
   (value-x :double) (value-y :double))
 
+(cffi:defcfun ("cpGrooveJointGetGrooveB" #.(chipmunk-lispify "cpGrooveJointGetGrooveB" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
+  (constraint :pointer))
+
 (cffi:defcfun ("cpGrooveJointSetGrooveB" #.(chipmunk-lispify "cpGrooveJointSetGrooveB" 'function)) :void
+  (constraint :pointer)
+  (value-x :double) (value-y :double))
+
+(cffi:defcfun ("cpGrooveJointGetAnchr2" #.(chipmunk-lispify "cpGrooveJointGetAnchr2" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
+  (constraint :pointer))
+
+(cffi:defcfun ("cpGrooveJointSetAnchr2" #.(chipmunk-lispify "cpGrooveJointSetAnchr2" 'function)) :void
   (constraint :pointer)
   (value-x :double) (value-y :double))
 
 (cffi:defcfun ("cpPinJointGetClass" #.(chipmunk-lispify "cpPinJointGetClass" 'function)) :pointer)
 
 (cffi:defcstruct #.(chipmunk-lispify "cpPinJoint" 'classname)
-	(#.(chipmunk-lispify "constraint" 'slotname) :pointer)
+	(#.(chipmunk-lispify "constraint" 'slotname) #.(chipmunk-lispify "cpConstraint" 'classname))
 	(anchr1-x :double) (anchr1-y :double)
 	(anchr2-x :double) (anchr2-y :double)
 	(#.(chipmunk-lispify "dist" 'slotname) :double)
@@ -832,10 +1008,31 @@
   (anchr1-x :double) (anchr1-y :double)
   (anchr2-x :double) (anchr2-y :double))
 
+(cffi:defcfun ("cpPinJointGetAnchr1" #.(chipmunk-lispify "cpPinJointGetAnchr1" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
+  (constraint :pointer))
+
+(cffi:defcfun ("cpPinJointSetAnchr1" #.(chipmunk-lispify "cpPinJointSetAnchr1" 'function)) :void
+  (constraint :pointer)
+  (value-x :double) (value-y :double))
+
+(cffi:defcfun ("cpPinJointGetAnchr2" #.(chipmunk-lispify "cpPinJointGetAnchr2" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
+  (constraint :pointer))
+
+(cffi:defcfun ("cpPinJointSetAnchr2" #.(chipmunk-lispify "cpPinJointSetAnchr2" 'function)) :void
+  (constraint :pointer)
+  (value-x :double) (value-y :double))
+
+(cffi:defcfun ("cpPinJointGetDist" #.(chipmunk-lispify "cpPinJointGetDist" 'function)) :double
+  (constraint :pointer))
+
+(cffi:defcfun ("cpPinJointSetDist" #.(chipmunk-lispify "cpPinJointSetDist" 'function)) :void
+  (constraint :pointer)
+  (value :double))
+
 (cffi:defcfun ("cpPivotJointGetClass" #.(chipmunk-lispify "cpPivotJointGetClass" 'function)) :pointer)
 
 (cffi:defcstruct #.(chipmunk-lispify "cpPivotJoint" 'classname)
-	(#.(chipmunk-lispify "constraint" 'slotname) :pointer)
+	(#.(chipmunk-lispify "constraint" 'slotname) #.(chipmunk-lispify "cpConstraint" 'classname))
 	(anchr1-x :double) (anchr1-y :double)
 	(anchr2-x :double) (anchr2-y :double)
 	(r1-x :double) (r1-y :double)
@@ -866,10 +1063,24 @@
   (anchr1-x :double) (anchr1-y :double)
   (anchr2-x :double) (anchr2-y :double))
 
+(cffi:defcfun ("cpPivotJointGetAnchr1" #.(chipmunk-lispify "cpPivotJointGetAnchr1" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
+  (constraint :pointer))
+
+(cffi:defcfun ("cpPivotJointSetAnchr1" #.(chipmunk-lispify "cpPivotJointSetAnchr1" 'function)) :void
+  (constraint :pointer)
+  (value-x :double) (value-y :double))
+
+(cffi:defcfun ("cpPivotJointGetAnchr2" #.(chipmunk-lispify "cpPivotJointGetAnchr2" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
+  (constraint :pointer))
+
+(cffi:defcfun ("cpPivotJointSetAnchr2" #.(chipmunk-lispify "cpPivotJointSetAnchr2" 'function)) :void
+  (constraint :pointer)
+  (value-x :double) (value-y :double))
+
 (cffi:defcfun ("cpRatchetJointGetClass" #.(chipmunk-lispify "cpRatchetJointGetClass" 'function)) :pointer)
 
 (cffi:defcstruct #.(chipmunk-lispify "cpRatchetJoint" 'classname)
-	(#.(chipmunk-lispify "constraint" 'slotname) :pointer)
+	(#.(chipmunk-lispify "constraint" 'slotname) #.(chipmunk-lispify "cpConstraint" 'classname))
 	(#.(chipmunk-lispify "angle" 'slotname) :double)
 	(#.(chipmunk-lispify "phase" 'slotname) :double)
 	(#.(chipmunk-lispify "ratchet" 'slotname) :double)
@@ -893,10 +1104,31 @@
   (phase :double)
   (ratchet :double))
 
+(cffi:defcfun ("cpRatchetJointGetAngle" #.(chipmunk-lispify "cpRatchetJointGetAngle" 'function)) :double
+  (constraint :pointer))
+
+(cffi:defcfun ("cpRatchetJointSetAngle" #.(chipmunk-lispify "cpRatchetJointSetAngle" 'function)) :void
+  (constraint :pointer)
+  (value :double))
+
+(cffi:defcfun ("cpRatchetJointGetPhase" #.(chipmunk-lispify "cpRatchetJointGetPhase" 'function)) :double
+  (constraint :pointer))
+
+(cffi:defcfun ("cpRatchetJointSetPhase" #.(chipmunk-lispify "cpRatchetJointSetPhase" 'function)) :void
+  (constraint :pointer)
+  (value :double))
+
+(cffi:defcfun ("cpRatchetJointGetRatchet" #.(chipmunk-lispify "cpRatchetJointGetRatchet" 'function)) :double
+  (constraint :pointer))
+
+(cffi:defcfun ("cpRatchetJointSetRatchet" #.(chipmunk-lispify "cpRatchetJointSetRatchet" 'function)) :void
+  (constraint :pointer)
+  (value :double))
+
 (cffi:defcfun ("cpRotaryLimitJointGetClass" #.(chipmunk-lispify "cpRotaryLimitJointGetClass" 'function)) :pointer)
 
 (cffi:defcstruct #.(chipmunk-lispify "cpRotaryLimitJoint" 'classname)
-	(#.(chipmunk-lispify "constraint" 'slotname) :pointer)
+	(#.(chipmunk-lispify "constraint" 'slotname) #.(chipmunk-lispify "cpConstraint" 'classname))
 	(#.(chipmunk-lispify "min" 'slotname) :double)
 	(#.(chipmunk-lispify "max" 'slotname) :double)
 	(#.(chipmunk-lispify "iSum" 'slotname) :double)
@@ -919,10 +1151,24 @@
   (min :double)
   (max :double))
 
+(cffi:defcfun ("cpRotaryLimitJointGetMin" #.(chipmunk-lispify "cpRotaryLimitJointGetMin" 'function)) :double
+  (constraint :pointer))
+
+(cffi:defcfun ("cpRotaryLimitJointSetMin" #.(chipmunk-lispify "cpRotaryLimitJointSetMin" 'function)) :void
+  (constraint :pointer)
+  (value :double))
+
+(cffi:defcfun ("cpRotaryLimitJointGetMax" #.(chipmunk-lispify "cpRotaryLimitJointGetMax" 'function)) :double
+  (constraint :pointer))
+
+(cffi:defcfun ("cpRotaryLimitJointSetMax" #.(chipmunk-lispify "cpRotaryLimitJointSetMax" 'function)) :void
+  (constraint :pointer)
+  (value :double))
+
 (cffi:defcfun ("cpSimpleMotorGetClass" #.(chipmunk-lispify "cpSimpleMotorGetClass" 'function)) :pointer)
 
 (cffi:defcstruct #.(chipmunk-lispify "cpSimpleMotor" 'classname)
-	(#.(chipmunk-lispify "constraint" 'slotname) :pointer)
+	(#.(chipmunk-lispify "constraint" 'slotname) #.(chipmunk-lispify "cpConstraint" 'classname))
 	(#.(chipmunk-lispify "rate" 'slotname) :double)
 	(#.(chipmunk-lispify "iSum" 'slotname) :double)
 	(#.(chipmunk-lispify "jAcc" 'slotname) :double)
@@ -941,10 +1187,17 @@
   (b :pointer)
   (rate :double))
 
+(cffi:defcfun ("cpSimpleMotorGetRate" #.(chipmunk-lispify "cpSimpleMotorGetRate" 'function)) :double
+  (constraint :pointer))
+
+(cffi:defcfun ("cpSimpleMotorSetRate" #.(chipmunk-lispify "cpSimpleMotorSetRate" 'function)) :void
+  (constraint :pointer)
+  (value :double))
+
 (cffi:defcfun ("cpSlideJointGetClass" #.(chipmunk-lispify "cpSlideJointGetClass" 'function)) :pointer)
 
 (cffi:defcstruct #.(chipmunk-lispify "cpSlideJoint" 'classname)
-	(#.(chipmunk-lispify "constraint" 'slotname) :pointer)
+	(#.(chipmunk-lispify "constraint" 'slotname) #.(chipmunk-lispify "cpConstraint" 'classname))
 	(anchr1-x :double) (anchr1-y :double)
 	(anchr2-x :double) (anchr2-y :double)
 	(#.(chipmunk-lispify "min" 'slotname) :double)
@@ -975,6 +1228,34 @@
   (anchr2-x :double) (anchr2-y :double)
   (min :double)
   (max :double))
+
+(cffi:defcfun ("cpSlideJointGetAnchr1" #.(chipmunk-lispify "cpSlideJointGetAnchr1" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
+  (constraint :pointer))
+
+(cffi:defcfun ("cpSlideJointSetAnchr1" #.(chipmunk-lispify "cpSlideJointSetAnchr1" 'function)) :void
+  (constraint :pointer)
+  (value-x :double) (value-y :double))
+
+(cffi:defcfun ("cpSlideJointGetAnchr2" #.(chipmunk-lispify "cpSlideJointGetAnchr2" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
+  (constraint :pointer))
+
+(cffi:defcfun ("cpSlideJointSetAnchr2" #.(chipmunk-lispify "cpSlideJointSetAnchr2" 'function)) :void
+  (constraint :pointer)
+  (value-x :double) (value-y :double))
+
+(cffi:defcfun ("cpSlideJointGetMin" #.(chipmunk-lispify "cpSlideJointGetMin" 'function)) :double
+  (constraint :pointer))
+
+(cffi:defcfun ("cpSlideJointSetMin" #.(chipmunk-lispify "cpSlideJointSetMin" 'function)) :void
+  (constraint :pointer)
+  (value :double))
+
+(cffi:defcfun ("cpSlideJointGetMax" #.(chipmunk-lispify "cpSlideJointGetMax" 'function)) :double
+  (constraint :pointer))
+
+(cffi:defcfun ("cpSlideJointSetMax" #.(chipmunk-lispify "cpSlideJointSetMax" 'function)) :void
+  (constraint :pointer)
+  (value :double))
 
 (cffi:defcstruct #.(chipmunk-lispify "cpSpace" 'classname)
 	(#.(chipmunk-lispify "iterations" 'slotname) :int)
