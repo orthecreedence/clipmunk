@@ -37,4 +37,24 @@ sed -i "s|.*NO_GREEDY_HACK||" exports.lisp
 # aaaand finish the import directives off
 sed -i "s|import-chipmunk-lispify|chipmunk-lispify|" exports.lisp
 
+# ------------------------------------------------------------------------------
+# Auto-generate ffi.lisp
+# ------------------------------------------------------------------------------
+cat << EOFMAC > ffi.lisp
+(in-package :clipmunk-ffi)
+
+(defmacro def-ffi (function)
+  `(progn
+     (defparameter ,(chipmunk-lispify function 'variable)
+                   (cffi:mem-aref (cffi:foreign-symbol-pointer ,(format nil "_~a" function))))
+EOFMAC
+FFI=/usr/local/include/chipmunk/chipmunk_ffi.h
+if [ -f $FFI ]; then
+	cat $FFI | \
+		grep -e '^MAKE_REF' | \
+		sed 's|.*(\([^)]\+\)).*|(def-ffi "\1")|i' >> ffi.lisp
+	cat $FFI | \
+		grep -e '^MAKE_PROPERTIES_REF' | \
+		sed 's|.*(\([^,]\+\),\s*\(\[^)]\)).*|(def-ffi-prop "\1" "\2")|i' >> ffi.lisp
+fi
 echo "Done!"
