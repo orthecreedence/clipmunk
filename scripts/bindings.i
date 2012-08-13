@@ -102,6 +102,16 @@
 %include "/usr/local/include/chipmunk/cpArbiter.h"
 /*%include "/usr/local/include/chipmunk/cpCollision.h"*/
 
-%include "/usr/local/include/chipmunk/constraints/cpConstraint.h"
+/*%include "/usr/local/include/chipmunk/constraints/cpConstraint.h"*/
+%include "/usr/local/include/chipmunk/constraints/cpDampedRotarySpring.h"
+%include "/usr/local/include/chipmunk/constraints/cpDampedSpring.h"
+%include "/usr/local/include/chipmunk/constraints/cpGearJoint.h"
+%include "/usr/local/include/chipmunk/constraints/cpGrooveJoint.h"
+%include "/usr/local/include/chipmunk/constraints/cpPinJoint.h"
+%include "/usr/local/include/chipmunk/constraints/cpPivotJoint.h"
+%include "/usr/local/include/chipmunk/constraints/cpRatchetJoint.h"
+%include "/usr/local/include/chipmunk/constraints/cpRotaryLimitJoint.h"
+%include "/usr/local/include/chipmunk/constraints/cpSimpleMotor.h"
+%include "/usr/local/include/chipmunk/constraints/cpSlideJoint.h"
 
 %include "/usr/local/include/chipmunk/cpSpace.h"
