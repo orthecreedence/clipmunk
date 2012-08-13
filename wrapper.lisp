@@ -1,49 +1,48 @@
 (in-package :clipmunk)
 
-(cl:defmacro defanonenum (&body enums)
+(defmacro defanonenum (&body enums)
    "Converts anonymous enums to defconstants."
-  `(cl:progn ,@(cl:loop for value in enums
-                        for index = 0 then (cl:1+ index)
-                        when (cl:listp value) do (cl:setf index (cl:second value)
-                                                          value (cl:first value))
-                        collect `(cl:defconstant ,value ,index))))
+  `(progn ,@(loop for value in enums
+                        for index = 0 then (1+ index)
+                        when (listp value) do (setf index (second value)
+                                                          value (first value))
+                        collect `(defconstant ,value ,index))))
 
-(cl:eval-when (:compile-toplevel :load-toplevel)
-  (cl:unless (cl:fboundp 'chipmunk-lispify)
-    (cl:defun chipmunk-lispify (name flag cl:&optional (package cl:*package*))
-      (cl:labels ((helper (lst last rest cl:&aux (c (cl:car lst)))
-                    (cl:cond
-                      ((cl:null lst)
-                       rest)
-                      ((cl:upper-case-p c)
-                       (helper (cl:cdr lst) 'upper
-                               (cl:case last
-                                 ((lower digit) (cl:list* c #\- rest))
-                                 (cl:t (cl:cons c rest)))))
-                      ((cl:lower-case-p c)
-                       (helper (cl:cdr lst) 'lower (cl:cons (cl:char-upcase c) rest)))
-                      ((cl:digit-char-p c)
-                       (helper (cl:cdr lst) 'digit 
-                               (cl:case last
-                                 ((upper lower) (cl:list* c #\- rest))
-                                 (cl:t (cl:cons c rest)))))
-                      ((cl:char-equal c #\_)
-                       (helper (cl:cdr lst) '_ (cl:cons #\- rest)))
-                      (cl:t
-                       (cl:error "Invalid character: ~A" c))))
-		  (strip-prefix (prf str)
-		    (let ((l (length prf)))
-		      (if (and (> (length str) l) (string= prf (subseq str 0 l)))
-			       (subseq str l)
-			       str))))
-        (cl:let ((fix (cl:case flag
-                        ((constant enumvalue) "+")
-                        (variable "*")
-                        (cl:t ""))))
-          (cl:intern
-           (cl:concatenate
-            'cl:string
-            fix
-            (cl:nreverse (helper (cl:concatenate 'cl:list (strip-prefix "cp" name)) cl:nil cl:nil))
-            fix)
-           package))))))
+(eval-when (:compile-toplevel :load-toplevel)
+  (unless (fboundp 'chipmunk-lispify)
+    (defun chipmunk-lispify (name flag &optional (package *package*))
+      (labels ((helper (lst last rest &aux (c (car lst)))
+                 (cond
+                   ((null lst)
+                    rest)
+                   ((upper-case-p c)
+                    (helper (cdr lst) 'upper
+                            (case last
+                              ((lower digit) (list* c #\- rest))
+                              (t (cons c rest)))))
+                   ((lower-case-p c)
+                    (helper (cdr lst) 'lower (cons (char-upcase c) rest)))
+                   ((digit-char-p c)
+                    (helper (cdr lst) 'digit 
+                            (case last
+                              ((upper lower) (list* c #\- rest))
+                              (t (cons c rest)))))
+                   ((char-equal c #\_)
+                    (helper (cdr lst) '_ (cons #\- rest)))
+                   (t
+                    (error "Invalid character: ~A" c))))
+               (strip-prefix (prf str)
+                 (let ((l (length prf)))
+                   (if (and (> (length str) l) (string= prf (subseq str 0 l)))
+                     (subseq str l)
+                     str))))
+        (let ((fix (case flag
+                     ((constant enumvalue) "+")
+                     (variable "*")
+                     (t ""))))
+          (let ((sym (intern (concatenate 'string fix (nreverse (helper (concatenate 'list (strip-prefix "cp" name)) nil nil)) fix)
+                             package)))
+            ;(format t "Exporting sym: ~s~%" sym)
+            (import sym package)
+            (export sym package)
+            sym))))))
