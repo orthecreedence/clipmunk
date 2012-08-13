@@ -286,3 +286,6 @@
 (export (chipmunk-lispify "cpSpaceReindexShapesForBody" 'function))
 (export (chipmunk-lispify "cpSpaceUseSpatialHash" 'function))
 (export (chipmunk-lispify "cpSpaceStep" 'function))
+(export (chipmunk-lispify "cpMomentForCircle" 'function))
+(export (chipmunk-lispify "cpMomentForSegment" 'function))
+(export (chipmunk-lispify "cpMomentForPoly" 'function))

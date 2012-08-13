@@ -26,7 +26,7 @@ sed -i "s|.*NO_GREEDY_HACK||" exports.lisp
 echo -en "\n" >> exports.lisp
 
 # create (export ...) directives
-cat bindings.lisp | \
+cat bindings.lisp extra-bindings.lisp | \
 	grep 'chipmunk-lispify' | \
 	grep -v 'slotname' | \
 	grep -v -e '^ .*classname' >> exports.lisp
