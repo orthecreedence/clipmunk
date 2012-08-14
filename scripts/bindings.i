@@ -4,6 +4,21 @@
 
 %insert("lisphead") %{
 (in-package :clipmunk)
+
+(defparameter *function-registry* (make-hash-table :test #'equal))
+(defparameter *class-registry* (make-hash-table :test #'equal))
+
+(cl:defmacro clipmunk-defcfun (names return-type &rest args)
+  `(progn
+     (setf (gethash ,(car names) *function-registry*) (list :return ',return-type
+                                                            :args ',(loop for arg in args
+                                                                          if (listp arg) collect (list (car arg) (cadr arg)))))
+     (cffi-replace:defcfun ,names ,return-type ,@args)))
+
+(cl:defmacro clipmunk-defcstruct (name &rest slots)
+  `(progn
+     (setf (gethash (clipmunk::convert-sym ',name) *class-registry*) ',(loop for slot in slots if (listp slot) collect (list (car slot) (cadr slot))))
+     (cffi-replace:defcstruct ,name ,@slots)))
 %}
 
 //  ignored 

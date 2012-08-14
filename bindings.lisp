@@ -6,11 +6,26 @@
 
 (in-package :clipmunk)
 
+(defparameter *function-registry* (make-hash-table :test #'equal))
+(defparameter *class-registry* (make-hash-table :test #'equal))
+
+(cl:defmacro clipmunk-defcfun (names return-type &rest args)
+  `(progn
+     (setf (gethash ,(car names) *function-registry*) (list :return ',return-type
+                                                            :args ',(loop for arg in args
+                                                                          if (listp arg) collect (list (car arg) (cadr arg)))))
+     (cffi:defcfun ,names ,return-type ,@args)))
+
+(cl:defmacro clipmunk-defcstruct (name &rest slots)
+  `(progn
+     (setf (gethash (clipmunk::convert-sym ',name) *class-registry*) ',(loop for slot in slots if (listp slot) collect (list (car slot) (cadr slot))))
+     (cffi:defcstruct ,name ,@slots)))
+
 
 
 (cl:defconstant #.(chipmunk-lispify "CP_ALLOW_PRIVATE_ACCESS" 'constant) 0)
 
-(cffi:defcfun ("cpMessage" #.(chipmunk-lispify "cpMessage" 'function)) :void
+(clipmunk-defcfun ("cpMessage" #.(chipmunk-lispify "cpMessage" 'function)) :void
   (condition :string)
   (file :string)
   (line :int)
@@ -30,39 +45,39 @@
 (cffi:defcvar ("cpVersionString" #.(chipmunk-lispify "cpVersionString" 'variable))
  :string)
 
-(cffi:defcfun ("cpInitChipmunk" #.(chipmunk-lispify "cpInitChipmunk" 'function)) :void)
+(clipmunk-defcfun ("cpInitChipmunk" #.(chipmunk-lispify "cpInitChipmunk" 'function)) :void)
 
-(cffi:defcfun ("cpAreaForCircle" #.(chipmunk-lispify "cpAreaForCircle" 'function)) :double
+(clipmunk-defcfun ("cpAreaForCircle" #.(chipmunk-lispify "cpAreaForCircle" 'function)) :double
   (r1 :double)
   (r2 :double))
 
-(cffi:defcfun ("cpAreaForSegment" #.(chipmunk-lispify "cpAreaForSegment" 'function)) :double
+(clipmunk-defcfun ("cpAreaForSegment" #.(chipmunk-lispify "cpAreaForSegment" 'function)) :double
   (a :pointer)
   (b :pointer)
   (r :double))
 
-(cffi:defcfun ("cpAreaForPoly" #.(chipmunk-lispify "cpAreaForPoly" 'function)) :double
+(clipmunk-defcfun ("cpAreaForPoly" #.(chipmunk-lispify "cpAreaForPoly" 'function)) :double
   (numVerts :int)
   (verts :pointer))
 
-(cffi:defcfun ("cpCentroidForPoly" #.(chipmunk-lispify "cpCentroidForPoly" 'function)) :pointer
+(clipmunk-defcfun ("cpCentroidForPoly" #.(chipmunk-lispify "cpCentroidForPoly" 'function)) :pointer
   (numVerts :int)
   (verts :pointer))
 
-(cffi:defcfun ("cpRecenterPoly" #.(chipmunk-lispify "cpRecenterPoly" 'function)) :void
+(clipmunk-defcfun ("cpRecenterPoly" #.(chipmunk-lispify "cpRecenterPoly" 'function)) :void
   (numVerts :int)
   (verts :pointer))
 
-(cffi:defcfun ("cpMomentForBox" #.(chipmunk-lispify "cpMomentForBox" 'function)) :double
+(clipmunk-defcfun ("cpMomentForBox" #.(chipmunk-lispify "cpMomentForBox" 'function)) :double
   (m :double)
   (width :double)
   (height :double))
 
-(cffi:defcfun ("cpMomentForBox2" #.(chipmunk-lispify "cpMomentForBox2" 'function)) :double
+(clipmunk-defcfun ("cpMomentForBox2" #.(chipmunk-lispify "cpMomentForBox2" 'function)) :double
   (m :double)
   (box :pointer))
 
-(cffi:defcfun ("cpConvexHull" #.(chipmunk-lispify "cpConvexHull" 'function)) :int
+(clipmunk-defcfun ("cpConvexHull" #.(chipmunk-lispify "cpConvexHull" 'function)) :int
   (count :int)
   (verts :pointer)
   (result :pointer)
@@ -75,79 +90,79 @@
 
 (cl:defconstant #.(chipmunk-lispify "M_E" 'constant) 2.71828182845904523536028747135266250d0)
 
-(cffi:defcfun ("cpfclamp01" #.(chipmunk-lispify "cpfclamp01" 'function)) :double
+(clipmunk-defcfun ("cpfclamp01" #.(chipmunk-lispify "cpfclamp01" 'function)) :double
   (f :double))
 
 (cl:defconstant #.(chipmunk-lispify "cpTrue" 'constant) 1)
 
 (cl:defconstant #.(chipmunk-lispify "cpFalse" 'constant) 0)
 
-(cffi:defcstruct #.(chipmunk-lispify "cpVect" 'classname)
+(clipmunk-defcstruct #.(chipmunk-lispify "cpVect" 'classname)
 	(#.(chipmunk-lispify "x" 'slotname) :double)
 	(#.(chipmunk-lispify "y" 'slotname) :double))
 
-(cffi:defcfun ("cpvlength" #.(chipmunk-lispify "cpvlength" 'function)) :double
+(clipmunk-defcfun ("cpvlength" #.(chipmunk-lispify "cpvlength" 'function)) :double
   (v-x :double) (v-y :double))
 
-(cffi:defcfun ("cpvtoangle" #.(chipmunk-lispify "cpvtoangle" 'function)) :double
+(clipmunk-defcfun ("cpvtoangle" #.(chipmunk-lispify "cpvtoangle" 'function)) :double
   (v-x :double) (v-y :double))
 
-(cffi:defcfun ("cpvstr" #.(chipmunk-lispify "cpvstr" 'function)) :string
+(clipmunk-defcfun ("cpvstr" #.(chipmunk-lispify "cpvstr" 'function)) :string
   (v-x :double) (v-y :double))
 
-(cffi:defcstruct #.(chipmunk-lispify "cpBB" 'classname)
+(clipmunk-defcstruct #.(chipmunk-lispify "cpBB" 'classname)
 	(#.(chipmunk-lispify "l" 'slotname) :double)
 	(#.(chipmunk-lispify "b" 'slotname) :double)
 	(#.(chipmunk-lispify "r" 'slotname) :double)
 	(#.(chipmunk-lispify "t" 'slotname) :double))
 
-(cffi:defcfun ("cpBBNewForCircle" #.(chipmunk-lispify "cpBBNewForCircle" 'function)) #.(chipmunk-lispify "cpBB" 'classname)
+(clipmunk-defcfun ("cpBBNewForCircle" #.(chipmunk-lispify "cpBBNewForCircle" 'function)) #.(chipmunk-lispify "cpBB" 'classname)
   (p-x :double) (p-y :double)
   (r :double))
 
-(cffi:defcfun ("cpBBIntersects" #.(chipmunk-lispify "cpBBIntersects" 'function)) :int
+(clipmunk-defcfun ("cpBBIntersects" #.(chipmunk-lispify "cpBBIntersects" 'function)) :int
   (a #.(chipmunk-lispify "cpBB" 'classname))
   (b #.(chipmunk-lispify "cpBB" 'classname)))
 
-(cffi:defcfun ("cpBBContainsBB" #.(chipmunk-lispify "cpBBContainsBB" 'function)) :int
+(clipmunk-defcfun ("cpBBContainsBB" #.(chipmunk-lispify "cpBBContainsBB" 'function)) :int
   (bb #.(chipmunk-lispify "cpBB" 'classname))
   (other #.(chipmunk-lispify "cpBB" 'classname)))
 
-(cffi:defcfun ("cpBBContainsVect" #.(chipmunk-lispify "cpBBContainsVect" 'function)) :int
+(clipmunk-defcfun ("cpBBContainsVect" #.(chipmunk-lispify "cpBBContainsVect" 'function)) :int
   (bb #.(chipmunk-lispify "cpBB" 'classname))
   (v-x :double) (v-y :double))
 
-(cffi:defcfun ("cpBBMerge" #.(chipmunk-lispify "cpBBMerge" 'function)) #.(chipmunk-lispify "cpBB" 'classname)
+(clipmunk-defcfun ("cpBBMerge" #.(chipmunk-lispify "cpBBMerge" 'function)) #.(chipmunk-lispify "cpBB" 'classname)
   (a #.(chipmunk-lispify "cpBB" 'classname))
   (b #.(chipmunk-lispify "cpBB" 'classname)))
 
-(cffi:defcfun ("cpBBExpand" #.(chipmunk-lispify "cpBBExpand" 'function)) #.(chipmunk-lispify "cpBB" 'classname)
+(clipmunk-defcfun ("cpBBExpand" #.(chipmunk-lispify "cpBBExpand" 'function)) #.(chipmunk-lispify "cpBB" 'classname)
   (bb #.(chipmunk-lispify "cpBB" 'classname))
   (v-x :double) (v-y :double))
 
-(cffi:defcfun ("cpBBArea" #.(chipmunk-lispify "cpBBArea" 'function)) :double
+(clipmunk-defcfun ("cpBBArea" #.(chipmunk-lispify "cpBBArea" 'function)) :double
   (bb #.(chipmunk-lispify "cpBB" 'classname)))
 
-(cffi:defcfun ("cpBBMergedArea" #.(chipmunk-lispify "cpBBMergedArea" 'function)) :double
+(clipmunk-defcfun ("cpBBMergedArea" #.(chipmunk-lispify "cpBBMergedArea" 'function)) :double
   (a #.(chipmunk-lispify "cpBB" 'classname))
   (b #.(chipmunk-lispify "cpBB" 'classname)))
 
-(cffi:defcfun ("cpBBSegmentQuery" #.(chipmunk-lispify "cpBBSegmentQuery" 'function)) :double
+(clipmunk-defcfun ("cpBBSegmentQuery" #.(chipmunk-lispify "cpBBSegmentQuery" 'function)) :double
   (bb #.(chipmunk-lispify "cpBB" 'classname))
   (a-x :double) (a-y :double)
   (b-x :double) (b-y :double))
 
-(cffi:defcfun ("cpBBIntersectsSegment" #.(chipmunk-lispify "cpBBIntersectsSegment" 'function)) :int
+(clipmunk-defcfun ("cpBBIntersectsSegment" #.(chipmunk-lispify "cpBBIntersectsSegment" 'function)) :int
   (bb #.(chipmunk-lispify "cpBB" 'classname))
   (a-x :double) (a-y :double)
   (b-x :double) (b-y :double))
 
-(cffi:defcstruct #.(chipmunk-lispify "cpComponentNode" 'classname)
+(clipmunk-defcstruct #.(chipmunk-lispify "cpComponentNode" 'classname)
 	(#.(chipmunk-lispify "root" 'slotname) :pointer)
 	(#.(chipmunk-lispify "next" 'slotname) :pointer)
 	(#.(chipmunk-lispify "idleTime" 'slotname) :double))
 
-(cffi:defcstruct #.(chipmunk-lispify "cpBody" 'classname)
+(clipmunk-defcstruct #.(chipmunk-lispify "cpBody" 'classname)
 	(#.(chipmunk-lispify "velocity_func" 'slotname) :pointer)
 	(#.(chipmunk-lispify "position_func" 'slotname) :pointer)
 	(#.(chipmunk-lispify "m" 'slotname) :double)
@@ -172,166 +187,166 @@
 	(#.(chipmunk-lispify "constraintList_private" 'slotname) :pointer)
 	(#.(chipmunk-lispify "node_private" 'slotname) #.(chipmunk-lispify "cpComponentNode" 'classname)))
 
-(cffi:defcfun ("cpBodyAlloc" #.(chipmunk-lispify "cpBodyAlloc" 'function)) :pointer)
+(clipmunk-defcfun ("cpBodyAlloc" #.(chipmunk-lispify "cpBodyAlloc" 'function)) :pointer)
 
-(cffi:defcfun ("cpBodyInit" #.(chipmunk-lispify "cpBodyInit" 'function)) :pointer
+(clipmunk-defcfun ("cpBodyInit" #.(chipmunk-lispify "cpBodyInit" 'function)) :pointer
   (body :pointer)
   (m :double)
   (i :double))
 
-(cffi:defcfun ("cpBodyNew" #.(chipmunk-lispify "cpBodyNew" 'function)) :pointer
+(clipmunk-defcfun ("cpBodyNew" #.(chipmunk-lispify "cpBodyNew" 'function)) :pointer
   (m :double)
   (i :double))
 
-(cffi:defcfun ("cpBodyInitStatic" #.(chipmunk-lispify "cpBodyInitStatic" 'function)) :pointer
+(clipmunk-defcfun ("cpBodyInitStatic" #.(chipmunk-lispify "cpBodyInitStatic" 'function)) :pointer
   (body :pointer))
 
-(cffi:defcfun ("cpBodyNewStatic" #.(chipmunk-lispify "cpBodyNewStatic" 'function)) :pointer)
+(clipmunk-defcfun ("cpBodyNewStatic" #.(chipmunk-lispify "cpBodyNewStatic" 'function)) :pointer)
 
-(cffi:defcfun ("cpBodyDestroy" #.(chipmunk-lispify "cpBodyDestroy" 'function)) :void
+(clipmunk-defcfun ("cpBodyDestroy" #.(chipmunk-lispify "cpBodyDestroy" 'function)) :void
   (body :pointer))
 
-(cffi:defcfun ("cpBodyFree" #.(chipmunk-lispify "cpBodyFree" 'function)) :void
+(clipmunk-defcfun ("cpBodyFree" #.(chipmunk-lispify "cpBodyFree" 'function)) :void
   (body :pointer))
 
-(cffi:defcfun ("cpBodySanityCheck" #.(chipmunk-lispify "cpBodySanityCheck" 'function)) :void
+(clipmunk-defcfun ("cpBodySanityCheck" #.(chipmunk-lispify "cpBodySanityCheck" 'function)) :void
   (body :pointer))
 
-(cffi:defcfun ("cpBodyActivate" #.(chipmunk-lispify "cpBodyActivate" 'function)) :void
+(clipmunk-defcfun ("cpBodyActivate" #.(chipmunk-lispify "cpBodyActivate" 'function)) :void
   (body :pointer))
 
-(cffi:defcfun ("cpBodyActivateStatic" #.(chipmunk-lispify "cpBodyActivateStatic" 'function)) :void
+(clipmunk-defcfun ("cpBodyActivateStatic" #.(chipmunk-lispify "cpBodyActivateStatic" 'function)) :void
   (body :pointer)
   (filter :pointer))
 
-(cffi:defcfun ("cpBodySleep" #.(chipmunk-lispify "cpBodySleep" 'function)) :void
+(clipmunk-defcfun ("cpBodySleep" #.(chipmunk-lispify "cpBodySleep" 'function)) :void
   (body :pointer))
 
-(cffi:defcfun ("cpBodySleepWithGroup" #.(chipmunk-lispify "cpBodySleepWithGroup" 'function)) :void
+(clipmunk-defcfun ("cpBodySleepWithGroup" #.(chipmunk-lispify "cpBodySleepWithGroup" 'function)) :void
   (body :pointer)
   (group :pointer))
 
-(cffi:defcfun ("cpBodyIsStatic" #.(chipmunk-lispify "cpBodyIsStatic" 'function)) :int
+(clipmunk-defcfun ("cpBodyIsStatic" #.(chipmunk-lispify "cpBodyIsStatic" 'function)) :int
   (body :pointer))
 
-(cffi:defcfun ("cpBodyGetSpace" #.(chipmunk-lispify "cpBodyGetSpace" 'function)) :pointer
+(clipmunk-defcfun ("cpBodyGetSpace" #.(chipmunk-lispify "cpBodyGetSpace" 'function)) :pointer
   (body :pointer))
 
-(cffi:defcfun ("cpBodyGetMass" #.(chipmunk-lispify "cpBodyGetMass" 'function)) :double
+(clipmunk-defcfun ("cpBodyGetMass" #.(chipmunk-lispify "cpBodyGetMass" 'function)) :double
   (body :pointer))
 
-(cffi:defcfun ("cpBodySetMass" #.(chipmunk-lispify "cpBodySetMass" 'function)) :void
+(clipmunk-defcfun ("cpBodySetMass" #.(chipmunk-lispify "cpBodySetMass" 'function)) :void
   (body :pointer)
   (m :double))
 
-(cffi:defcfun ("cpBodyGetMoment" #.(chipmunk-lispify "cpBodyGetMoment" 'function)) :double
+(clipmunk-defcfun ("cpBodyGetMoment" #.(chipmunk-lispify "cpBodyGetMoment" 'function)) :double
   (body :pointer))
 
-(cffi:defcfun ("cpBodySetMoment" #.(chipmunk-lispify "cpBodySetMoment" 'function)) :void
+(clipmunk-defcfun ("cpBodySetMoment" #.(chipmunk-lispify "cpBodySetMoment" 'function)) :void
   (body :pointer)
   (i :double))
 
-(cffi:defcfun ("cpBodySetPos" #.(chipmunk-lispify "cpBodySetPos" 'function)) :void
+(clipmunk-defcfun ("cpBodySetPos" #.(chipmunk-lispify "cpBodySetPos" 'function)) :void
   (body :pointer)
   (pos-x :double) (pos-y :double))
 
-(cffi:defcfun ("cpBodySetVel" #.(chipmunk-lispify "cpBodySetVel" 'function)) :void
+(clipmunk-defcfun ("cpBodySetVel" #.(chipmunk-lispify "cpBodySetVel" 'function)) :void
   (body :pointer)
   (value-x :double) (value-y :double))
 
-(cffi:defcfun ("cpBodySetForce" #.(chipmunk-lispify "cpBodySetForce" 'function)) :void
+(clipmunk-defcfun ("cpBodySetForce" #.(chipmunk-lispify "cpBodySetForce" 'function)) :void
   (body :pointer)
   (value-x :double) (value-y :double))
 
-(cffi:defcfun ("cpBodyGetAngle" #.(chipmunk-lispify "cpBodyGetAngle" 'function)) :double
+(clipmunk-defcfun ("cpBodyGetAngle" #.(chipmunk-lispify "cpBodyGetAngle" 'function)) :double
   (body :pointer))
 
-(cffi:defcfun ("cpBodySetAngle" #.(chipmunk-lispify "cpBodySetAngle" 'function)) :void
+(clipmunk-defcfun ("cpBodySetAngle" #.(chipmunk-lispify "cpBodySetAngle" 'function)) :void
   (body :pointer)
   (a :double))
 
-(cffi:defcfun ("cpBodyGetAngVel" #.(chipmunk-lispify "cpBodyGetAngVel" 'function)) :double
+(clipmunk-defcfun ("cpBodyGetAngVel" #.(chipmunk-lispify "cpBodyGetAngVel" 'function)) :double
   (body :pointer))
 
-(cffi:defcfun ("cpBodySetAngVel" #.(chipmunk-lispify "cpBodySetAngVel" 'function)) :void
+(clipmunk-defcfun ("cpBodySetAngVel" #.(chipmunk-lispify "cpBodySetAngVel" 'function)) :void
   (body :pointer)
   (value :double))
 
-(cffi:defcfun ("cpBodyGetTorque" #.(chipmunk-lispify "cpBodyGetTorque" 'function)) :double
+(clipmunk-defcfun ("cpBodyGetTorque" #.(chipmunk-lispify "cpBodyGetTorque" 'function)) :double
   (body :pointer))
 
-(cffi:defcfun ("cpBodySetTorque" #.(chipmunk-lispify "cpBodySetTorque" 'function)) :void
+(clipmunk-defcfun ("cpBodySetTorque" #.(chipmunk-lispify "cpBodySetTorque" 'function)) :void
   (body :pointer)
   (value :double))
 
-(cffi:defcfun ("cpBodyGetVelLimit" #.(chipmunk-lispify "cpBodyGetVelLimit" 'function)) :double
+(clipmunk-defcfun ("cpBodyGetVelLimit" #.(chipmunk-lispify "cpBodyGetVelLimit" 'function)) :double
   (body :pointer))
 
-(cffi:defcfun ("cpBodySetVelLimit" #.(chipmunk-lispify "cpBodySetVelLimit" 'function)) :void
+(clipmunk-defcfun ("cpBodySetVelLimit" #.(chipmunk-lispify "cpBodySetVelLimit" 'function)) :void
   (body :pointer)
   (value :double))
 
-(cffi:defcfun ("cpBodyGetAngVelLimit" #.(chipmunk-lispify "cpBodyGetAngVelLimit" 'function)) :double
+(clipmunk-defcfun ("cpBodyGetAngVelLimit" #.(chipmunk-lispify "cpBodyGetAngVelLimit" 'function)) :double
   (body :pointer))
 
-(cffi:defcfun ("cpBodySetAngVelLimit" #.(chipmunk-lispify "cpBodySetAngVelLimit" 'function)) :void
+(clipmunk-defcfun ("cpBodySetAngVelLimit" #.(chipmunk-lispify "cpBodySetAngVelLimit" 'function)) :void
   (body :pointer)
   (value :double))
 
-(cffi:defcfun ("cpBodyGetUserData" #.(chipmunk-lispify "cpBodyGetUserData" 'function)) :pointer
+(clipmunk-defcfun ("cpBodyGetUserData" #.(chipmunk-lispify "cpBodyGetUserData" 'function)) :pointer
   (body :pointer))
 
-(cffi:defcfun ("cpBodySetUserData" #.(chipmunk-lispify "cpBodySetUserData" 'function)) :void
+(clipmunk-defcfun ("cpBodySetUserData" #.(chipmunk-lispify "cpBodySetUserData" 'function)) :void
   (body :pointer)
   (value :pointer))
 
-(cffi:defcfun ("cpBodyUpdateVelocity" #.(chipmunk-lispify "cpBodyUpdateVelocity" 'function)) :void
+(clipmunk-defcfun ("cpBodyUpdateVelocity" #.(chipmunk-lispify "cpBodyUpdateVelocity" 'function)) :void
   (body :pointer)
   (gravity-x :double) (gravity-y :double)
   (damping :double)
   (dt :double))
 
-(cffi:defcfun ("cpBodyUpdatePosition" #.(chipmunk-lispify "cpBodyUpdatePosition" 'function)) :void
+(clipmunk-defcfun ("cpBodyUpdatePosition" #.(chipmunk-lispify "cpBodyUpdatePosition" 'function)) :void
   (body :pointer)
   (dt :double))
 
-(cffi:defcfun ("cpBodyResetForces" #.(chipmunk-lispify "cpBodyResetForces" 'function)) :void
+(clipmunk-defcfun ("cpBodyResetForces" #.(chipmunk-lispify "cpBodyResetForces" 'function)) :void
   (body :pointer))
 
-(cffi:defcfun ("cpBodyApplyForce" #.(chipmunk-lispify "cpBodyApplyForce" 'function)) :void
+(clipmunk-defcfun ("cpBodyApplyForce" #.(chipmunk-lispify "cpBodyApplyForce" 'function)) :void
   (body :pointer)
   (f-x :double) (f-y :double)
   (r-x :double) (r-y :double))
 
-(cffi:defcfun ("cpBodyGetVelAtWorldPoint" #.(chipmunk-lispify "cpBodyGetVelAtWorldPoint" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
+(clipmunk-defcfun ("cpBodyGetVelAtWorldPoint" #.(chipmunk-lispify "cpBodyGetVelAtWorldPoint" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
   (body :pointer)
   (point-x :double) (point-y :double))
 
-(cffi:defcfun ("cpBodyGetVelAtLocalPoint" #.(chipmunk-lispify "cpBodyGetVelAtLocalPoint" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
+(clipmunk-defcfun ("cpBodyGetVelAtLocalPoint" #.(chipmunk-lispify "cpBodyGetVelAtLocalPoint" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
   (body :pointer)
   (point-x :double) (point-y :double))
 
-(cffi:defcfun ("cpBodyEachShape" #.(chipmunk-lispify "cpBodyEachShape" 'function)) :void
+(clipmunk-defcfun ("cpBodyEachShape" #.(chipmunk-lispify "cpBodyEachShape" 'function)) :void
   (body :pointer)
   (func :pointer)
   (data :pointer))
 
-(cffi:defcfun ("cpBodyEachConstraint" #.(chipmunk-lispify "cpBodyEachConstraint" 'function)) :void
+(clipmunk-defcfun ("cpBodyEachConstraint" #.(chipmunk-lispify "cpBodyEachConstraint" 'function)) :void
   (body :pointer)
   (func :pointer)
   (data :pointer))
 
-(cffi:defcfun ("cpBodyEachArbiter" #.(chipmunk-lispify "cpBodyEachArbiter" 'function)) :void
+(clipmunk-defcfun ("cpBodyEachArbiter" #.(chipmunk-lispify "cpBodyEachArbiter" 'function)) :void
   (body :pointer)
   (func :pointer)
   (data :pointer))
 
-(cffi:defcstruct #.(chipmunk-lispify "cpNearestPointQueryInfo" 'classname)
+(clipmunk-defcstruct #.(chipmunk-lispify "cpNearestPointQueryInfo" 'classname)
 	(#.(chipmunk-lispify "shape" 'slotname) :pointer)
 	(p-x :double) (p-y :double)
 	(#.(chipmunk-lispify "d" 'slotname) :double))
 
-(cffi:defcstruct #.(chipmunk-lispify "cpSegmentQueryInfo" 'classname)
+(clipmunk-defcstruct #.(chipmunk-lispify "cpSegmentQueryInfo" 'classname)
 	(#.(chipmunk-lispify "shape" 'slotname) :pointer)
 	(#.(chipmunk-lispify "t" 'slotname) :double)
 	(n-x :double) (n-y :double))
@@ -342,14 +357,14 @@
 	#.(chipmunk-lispify "CP_POLY_SHAPE" 'enumvalue :keyword)
 	#.(chipmunk-lispify "CP_NUM_SHAPES" 'enumvalue :keyword))
 
-(cffi:defcstruct #.(chipmunk-lispify "cpShapeClass" 'classname)
+(clipmunk-defcstruct #.(chipmunk-lispify "cpShapeClass" 'classname)
 	(#.(chipmunk-lispify "type" 'slotname) #.(chipmunk-lispify "cpShapeType" 'enumname))
 	(#.(chipmunk-lispify "cacheData" 'slotname) :pointer)
 	(#.(chipmunk-lispify "destroy" 'slotname) :pointer)
 	(#.(chipmunk-lispify "nearestPointQuery" 'slotname) :pointer)
 	(#.(chipmunk-lispify "segmentQuery" 'slotname) :pointer))
 
-(cffi:defcstruct #.(chipmunk-lispify "cpShape" 'classname)
+(clipmunk-defcstruct #.(chipmunk-lispify "cpShape" 'classname)
 	(#.(chipmunk-lispify "klass_private" 'slotname) :pointer)
 	(#.(chipmunk-lispify "body" 'slotname) :pointer)
 	(#.(chipmunk-lispify "bb" 'slotname) #.(chipmunk-lispify "cpBB" 'classname))
@@ -366,129 +381,129 @@
 	(#.(chipmunk-lispify "prev_private" 'slotname) :pointer)
 	(#.(chipmunk-lispify "hashid_private" 'slotname) :pointer))
 
-(cffi:defcfun ("cpShapeDestroy" #.(chipmunk-lispify "cpShapeDestroy" 'function)) :void
+(clipmunk-defcfun ("cpShapeDestroy" #.(chipmunk-lispify "cpShapeDestroy" 'function)) :void
   (shape :pointer))
 
-(cffi:defcfun ("cpShapeFree" #.(chipmunk-lispify "cpShapeFree" 'function)) :void
+(clipmunk-defcfun ("cpShapeFree" #.(chipmunk-lispify "cpShapeFree" 'function)) :void
   (shape :pointer))
 
-(cffi:defcfun ("cpShapeCacheBB" #.(chipmunk-lispify "cpShapeCacheBB" 'function)) #.(chipmunk-lispify "cpBB" 'classname)
+(clipmunk-defcfun ("cpShapeCacheBB" #.(chipmunk-lispify "cpShapeCacheBB" 'function)) #.(chipmunk-lispify "cpBB" 'classname)
   (shape :pointer))
 
-(cffi:defcfun ("cpShapeUpdate" #.(chipmunk-lispify "cpShapeUpdate" 'function)) #.(chipmunk-lispify "cpBB" 'classname)
+(clipmunk-defcfun ("cpShapeUpdate" #.(chipmunk-lispify "cpShapeUpdate" 'function)) #.(chipmunk-lispify "cpBB" 'classname)
   (shape :pointer)
   (pos-x :double) (pos-y :double)
   (rot-x :double) (rot-y :double))
 
-(cffi:defcfun ("cpShapePointQuery" #.(chipmunk-lispify "cpShapePointQuery" 'function)) :int
+(clipmunk-defcfun ("cpShapePointQuery" #.(chipmunk-lispify "cpShapePointQuery" 'function)) :int
   (shape :pointer)
   (p-x :double) (p-y :double))
 
-(cffi:defcfun ("cpShapeNearestPointQuery" #.(chipmunk-lispify "cpShapeNearestPointQuery" 'function)) :double
+(clipmunk-defcfun ("cpShapeNearestPointQuery" #.(chipmunk-lispify "cpShapeNearestPointQuery" 'function)) :double
   (shape :pointer)
   (p-x :double) (p-y :double)
   (out :pointer))
 
-(cffi:defcfun ("cpShapeSegmentQuery" #.(chipmunk-lispify "cpShapeSegmentQuery" 'function)) :int
+(clipmunk-defcfun ("cpShapeSegmentQuery" #.(chipmunk-lispify "cpShapeSegmentQuery" 'function)) :int
   (shape :pointer)
   (a-x :double) (a-y :double)
   (b-x :double) (b-y :double)
   (info :pointer))
 
-(cffi:defcfun ("cpShapeGetSpace" #.(chipmunk-lispify "cpShapeGetSpace" 'function)) :pointer
+(clipmunk-defcfun ("cpShapeGetSpace" #.(chipmunk-lispify "cpShapeGetSpace" 'function)) :pointer
   (shape :pointer))
 
-(cffi:defcfun ("cpShapeGetBody" #.(chipmunk-lispify "cpShapeGetBody" 'function)) :pointer
+(clipmunk-defcfun ("cpShapeGetBody" #.(chipmunk-lispify "cpShapeGetBody" 'function)) :pointer
   (shape :pointer))
 
-(cffi:defcfun ("cpShapeSetBody" #.(chipmunk-lispify "cpShapeSetBody" 'function)) :void
+(clipmunk-defcfun ("cpShapeSetBody" #.(chipmunk-lispify "cpShapeSetBody" 'function)) :void
   (shape :pointer)
   (body :pointer))
 
-(cffi:defcfun ("cpShapeGetBB" #.(chipmunk-lispify "cpShapeGetBB" 'function)) #.(chipmunk-lispify "cpBB" 'classname)
+(clipmunk-defcfun ("cpShapeGetBB" #.(chipmunk-lispify "cpShapeGetBB" 'function)) #.(chipmunk-lispify "cpBB" 'classname)
   (shape :pointer))
 
-(cffi:defcfun ("cpShapeGetSensor" #.(chipmunk-lispify "cpShapeGetSensor" 'function)) :int
+(clipmunk-defcfun ("cpShapeGetSensor" #.(chipmunk-lispify "cpShapeGetSensor" 'function)) :int
   (shape :pointer))
 
-(cffi:defcfun ("cpShapeSetSensor" #.(chipmunk-lispify "cpShapeSetSensor" 'function)) :void
+(clipmunk-defcfun ("cpShapeSetSensor" #.(chipmunk-lispify "cpShapeSetSensor" 'function)) :void
   (shape :pointer)
   (value :int))
 
-(cffi:defcfun ("cpShapeGetElasticity" #.(chipmunk-lispify "cpShapeGetElasticity" 'function)) :double
+(clipmunk-defcfun ("cpShapeGetElasticity" #.(chipmunk-lispify "cpShapeGetElasticity" 'function)) :double
   (shape :pointer))
 
-(cffi:defcfun ("cpShapeSetElasticity" #.(chipmunk-lispify "cpShapeSetElasticity" 'function)) :void
+(clipmunk-defcfun ("cpShapeSetElasticity" #.(chipmunk-lispify "cpShapeSetElasticity" 'function)) :void
   (shape :pointer)
   (value :double))
 
-(cffi:defcfun ("cpShapeGetFriction" #.(chipmunk-lispify "cpShapeGetFriction" 'function)) :double
+(clipmunk-defcfun ("cpShapeGetFriction" #.(chipmunk-lispify "cpShapeGetFriction" 'function)) :double
   (shape :pointer))
 
-(cffi:defcfun ("cpShapeSetFriction" #.(chipmunk-lispify "cpShapeSetFriction" 'function)) :void
+(clipmunk-defcfun ("cpShapeSetFriction" #.(chipmunk-lispify "cpShapeSetFriction" 'function)) :void
   (shape :pointer)
   (value :double))
 
-(cffi:defcfun ("cpShapeGetSurfaceVelocity" #.(chipmunk-lispify "cpShapeGetSurfaceVelocity" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
+(clipmunk-defcfun ("cpShapeGetSurfaceVelocity" #.(chipmunk-lispify "cpShapeGetSurfaceVelocity" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
   (shape :pointer))
 
-(cffi:defcfun ("cpShapeSetSurfaceVelocity" #.(chipmunk-lispify "cpShapeSetSurfaceVelocity" 'function)) :void
+(clipmunk-defcfun ("cpShapeSetSurfaceVelocity" #.(chipmunk-lispify "cpShapeSetSurfaceVelocity" 'function)) :void
   (shape :pointer)
   (value-x :double) (value-y :double))
 
-(cffi:defcfun ("cpShapeGetUserData" #.(chipmunk-lispify "cpShapeGetUserData" 'function)) :pointer
+(clipmunk-defcfun ("cpShapeGetUserData" #.(chipmunk-lispify "cpShapeGetUserData" 'function)) :pointer
   (shape :pointer))
 
-(cffi:defcfun ("cpShapeSetUserData" #.(chipmunk-lispify "cpShapeSetUserData" 'function)) :void
+(clipmunk-defcfun ("cpShapeSetUserData" #.(chipmunk-lispify "cpShapeSetUserData" 'function)) :void
   (shape :pointer)
   (value :pointer))
 
-(cffi:defcfun ("cpShapeGetCollisionType" #.(chipmunk-lispify "cpShapeGetCollisionType" 'function)) :pointer
+(clipmunk-defcfun ("cpShapeGetCollisionType" #.(chipmunk-lispify "cpShapeGetCollisionType" 'function)) :pointer
   (shape :pointer))
 
-(cffi:defcfun ("cpShapeSetCollisionType" #.(chipmunk-lispify "cpShapeSetCollisionType" 'function)) :void
+(clipmunk-defcfun ("cpShapeSetCollisionType" #.(chipmunk-lispify "cpShapeSetCollisionType" 'function)) :void
   (shape :pointer)
   (value :pointer))
 
-(cffi:defcfun ("cpShapeGetGroup" #.(chipmunk-lispify "cpShapeGetGroup" 'function)) :pointer
+(clipmunk-defcfun ("cpShapeGetGroup" #.(chipmunk-lispify "cpShapeGetGroup" 'function)) :pointer
   (shape :pointer))
 
-(cffi:defcfun ("cpShapeSetGroup" #.(chipmunk-lispify "cpShapeSetGroup" 'function)) :void
+(clipmunk-defcfun ("cpShapeSetGroup" #.(chipmunk-lispify "cpShapeSetGroup" 'function)) :void
   (shape :pointer)
   (value :pointer))
 
-(cffi:defcfun ("cpShapeGetLayers" #.(chipmunk-lispify "cpShapeGetLayers" 'function)) :unsigned-int
+(clipmunk-defcfun ("cpShapeGetLayers" #.(chipmunk-lispify "cpShapeGetLayers" 'function)) :unsigned-int
   (shape :pointer))
 
-(cffi:defcfun ("cpShapeSetLayers" #.(chipmunk-lispify "cpShapeSetLayers" 'function)) :void
+(clipmunk-defcfun ("cpShapeSetLayers" #.(chipmunk-lispify "cpShapeSetLayers" 'function)) :void
   (shape :pointer)
   (value :unsigned-int))
 
-(cffi:defcfun ("cpResetShapeIdCounter" #.(chipmunk-lispify "cpResetShapeIdCounter" 'function)) :void)
+(clipmunk-defcfun ("cpResetShapeIdCounter" #.(chipmunk-lispify "cpResetShapeIdCounter" 'function)) :void)
 
-(cffi:defcstruct #.(chipmunk-lispify "cpCircleShape" 'classname)
+(clipmunk-defcstruct #.(chipmunk-lispify "cpCircleShape" 'classname)
 	(#.(chipmunk-lispify "shape" 'slotname) #.(chipmunk-lispify "cpShape" 'classname))
 	(c-x :double) (c-y :double)
 	(tc-x :double) (tc-y :double)
 	(#.(chipmunk-lispify "r" 'slotname) :double))
 
-(cffi:defcfun ("cpCircleShapeAlloc" #.(chipmunk-lispify "cpCircleShapeAlloc" 'function)) :pointer)
+(clipmunk-defcfun ("cpCircleShapeAlloc" #.(chipmunk-lispify "cpCircleShapeAlloc" 'function)) :pointer)
 
-(cffi:defcfun ("cpCircleShapeInit" #.(chipmunk-lispify "cpCircleShapeInit" 'function)) :pointer
+(clipmunk-defcfun ("cpCircleShapeInit" #.(chipmunk-lispify "cpCircleShapeInit" 'function)) :pointer
   (circle :pointer)
   (body :pointer)
   (radius :double)
   (offset-x :double) (offset-y :double))
 
-(cffi:defcfun ("cpCircleShapeNew" #.(chipmunk-lispify "cpCircleShapeNew" 'function)) :pointer
+(clipmunk-defcfun ("cpCircleShapeNew" #.(chipmunk-lispify "cpCircleShapeNew" 'function)) :pointer
   (body :pointer)
   (radius :double)
   (offset-x :double) (offset-y :double))
 
-(cffi:defcfun ("cpCircleShapeGetRadius" #.(chipmunk-lispify "cpCircleShapeGetRadius" 'function)) :double
+(clipmunk-defcfun ("cpCircleShapeGetRadius" #.(chipmunk-lispify "cpCircleShapeGetRadius" 'function)) :double
   (shape :pointer))
 
-(cffi:defcstruct #.(chipmunk-lispify "cpSegmentShape" 'classname)
+(clipmunk-defcstruct #.(chipmunk-lispify "cpSegmentShape" 'classname)
 	(#.(chipmunk-lispify "shape" 'slotname) #.(chipmunk-lispify "cpShape" 'classname))
 	(a-x :double) (a-y :double)
 	(b-x :double) (b-y :double)
@@ -500,34 +515,34 @@
 	(a_tangent-x :double) (a_tangent-y :double)
 	(b_tangent-x :double) (b_tangent-y :double))
 
-(cffi:defcfun ("cpSegmentShapeAlloc" #.(chipmunk-lispify "cpSegmentShapeAlloc" 'function)) :pointer)
+(clipmunk-defcfun ("cpSegmentShapeAlloc" #.(chipmunk-lispify "cpSegmentShapeAlloc" 'function)) :pointer)
 
-(cffi:defcfun ("cpSegmentShapeInit" #.(chipmunk-lispify "cpSegmentShapeInit" 'function)) :pointer
+(clipmunk-defcfun ("cpSegmentShapeInit" #.(chipmunk-lispify "cpSegmentShapeInit" 'function)) :pointer
   (seg :pointer)
   (body :pointer)
   (a-x :double) (a-y :double)
   (b-x :double) (b-y :double)
   (radius :double))
 
-(cffi:defcfun ("cpSegmentShapeNew" #.(chipmunk-lispify "cpSegmentShapeNew" 'function)) :pointer
+(clipmunk-defcfun ("cpSegmentShapeNew" #.(chipmunk-lispify "cpSegmentShapeNew" 'function)) :pointer
   (body :pointer)
   (a-x :double) (a-y :double)
   (b-x :double) (b-y :double)
   (radius :double))
 
-(cffi:defcfun ("cpSegmentShapeSetNeighbors" #.(chipmunk-lispify "cpSegmentShapeSetNeighbors" 'function)) :void
+(clipmunk-defcfun ("cpSegmentShapeSetNeighbors" #.(chipmunk-lispify "cpSegmentShapeSetNeighbors" 'function)) :void
   (shape :pointer)
   (prev-x :double) (prev-y :double)
   (next-x :double) (next-y :double))
 
-(cffi:defcfun ("cpSegmentShapeGetRadius" #.(chipmunk-lispify "cpSegmentShapeGetRadius" 'function)) :double
+(clipmunk-defcfun ("cpSegmentShapeGetRadius" #.(chipmunk-lispify "cpSegmentShapeGetRadius" 'function)) :double
   (shape :pointer))
 
-(cffi:defcstruct #.(chipmunk-lispify "cpSplittingPlane" 'classname)
+(clipmunk-defcstruct #.(chipmunk-lispify "cpSplittingPlane" 'classname)
 	(n-x :double) (n-y :double)
 	(#.(chipmunk-lispify "d" 'slotname) :double))
 
-(cffi:defcstruct #.(chipmunk-lispify "cpPolyShape" 'classname)
+(clipmunk-defcstruct #.(chipmunk-lispify "cpPolyShape" 'classname)
 	(#.(chipmunk-lispify "shape" 'slotname) #.(chipmunk-lispify "cpShape" 'classname))
 	(#.(chipmunk-lispify "numVerts" 'slotname) :int)
 	(#.(chipmunk-lispify "verts" 'slotname) :pointer)
@@ -535,49 +550,49 @@
 	(#.(chipmunk-lispify "planes" 'slotname) :pointer)
 	(#.(chipmunk-lispify "tPlanes" 'slotname) :pointer))
 
-(cffi:defcfun ("cpPolyShapeAlloc" #.(chipmunk-lispify "cpPolyShapeAlloc" 'function)) :pointer)
+(clipmunk-defcfun ("cpPolyShapeAlloc" #.(chipmunk-lispify "cpPolyShapeAlloc" 'function)) :pointer)
 
-(cffi:defcfun ("cpPolyShapeInit" #.(chipmunk-lispify "cpPolyShapeInit" 'function)) :pointer
+(clipmunk-defcfun ("cpPolyShapeInit" #.(chipmunk-lispify "cpPolyShapeInit" 'function)) :pointer
   (poly :pointer)
   (body :pointer)
   (numVerts :int)
   (verts :pointer)
   (offset-x :double) (offset-y :double))
 
-(cffi:defcfun ("cpPolyShapeNew" #.(chipmunk-lispify "cpPolyShapeNew" 'function)) :pointer
+(clipmunk-defcfun ("cpPolyShapeNew" #.(chipmunk-lispify "cpPolyShapeNew" 'function)) :pointer
   (body :pointer)
   (numVerts :int)
   (verts :pointer)
   (offset-x :double) (offset-y :double))
 
-(cffi:defcfun ("cpBoxShapeInit" #.(chipmunk-lispify "cpBoxShapeInit" 'function)) :pointer
+(clipmunk-defcfun ("cpBoxShapeInit" #.(chipmunk-lispify "cpBoxShapeInit" 'function)) :pointer
   (poly :pointer)
   (body :pointer)
   (width :double)
   (height :double))
 
-(cffi:defcfun ("cpBoxShapeInit2" #.(chipmunk-lispify "cpBoxShapeInit2" 'function)) :pointer
+(clipmunk-defcfun ("cpBoxShapeInit2" #.(chipmunk-lispify "cpBoxShapeInit2" 'function)) :pointer
   (poly :pointer)
   (body :pointer)
   (box #.(chipmunk-lispify "cpBB" 'classname)))
 
-(cffi:defcfun ("cpBoxShapeNew" #.(chipmunk-lispify "cpBoxShapeNew" 'function)) :pointer
+(clipmunk-defcfun ("cpBoxShapeNew" #.(chipmunk-lispify "cpBoxShapeNew" 'function)) :pointer
   (body :pointer)
   (width :double)
   (height :double))
 
-(cffi:defcfun ("cpBoxShapeNew2" #.(chipmunk-lispify "cpBoxShapeNew2" 'function)) :pointer
+(clipmunk-defcfun ("cpBoxShapeNew2" #.(chipmunk-lispify "cpBoxShapeNew2" 'function)) :pointer
   (body :pointer)
   (box #.(chipmunk-lispify "cpBB" 'classname)))
 
-(cffi:defcfun ("cpPolyValidate" #.(chipmunk-lispify "cpPolyValidate" 'function)) :int
+(clipmunk-defcfun ("cpPolyValidate" #.(chipmunk-lispify "cpPolyValidate" 'function)) :int
   (verts :pointer)
   (numVerts :int))
 
-(cffi:defcfun ("cpPolyShapeGetNumVerts" #.(chipmunk-lispify "cpPolyShapeGetNumVerts" 'function)) :int
+(clipmunk-defcfun ("cpPolyShapeGetNumVerts" #.(chipmunk-lispify "cpPolyShapeGetNumVerts" 'function)) :int
   (shape :pointer))
 
-(cffi:defcstruct #.(chipmunk-lispify "cpCollisionHandler" 'classname)
+(clipmunk-defcstruct #.(chipmunk-lispify "cpCollisionHandler" 'classname)
 	(#.(chipmunk-lispify "a" 'slotname) :pointer)
 	(#.(chipmunk-lispify "b" 'slotname) :pointer)
 	(#.(chipmunk-lispify "begin" 'slotname) :pointer)
@@ -594,11 +609,11 @@
 	#.(chipmunk-lispify "cpArbiterStateIgnore" 'enumvalue :keyword)
 	#.(chipmunk-lispify "cpArbiterStateCached" 'enumvalue :keyword))
 
-(cffi:defcstruct #.(chipmunk-lispify "cpArbiterThread" 'classname)
+(clipmunk-defcstruct #.(chipmunk-lispify "cpArbiterThread" 'classname)
 	(#.(chipmunk-lispify "next" 'slotname) :pointer)
 	(#.(chipmunk-lispify "prev" 'slotname) :pointer))
 
-(cffi:defcstruct #.(chipmunk-lispify "cpArbiter" 'classname)
+(clipmunk-defcstruct #.(chipmunk-lispify "cpArbiter" 'classname)
 	(#.(chipmunk-lispify "e" 'slotname) :double)
 	(#.(chipmunk-lispify "u" 'slotname) :double)
 	(surface_vr-x :double) (surface_vr-y :double)
@@ -615,59 +630,59 @@
 	(#.(chipmunk-lispify "swappedColl_private" 'slotname) :int)
 	(#.(chipmunk-lispify "state_private" 'slotname) #.(chipmunk-lispify "cpArbiterState" 'enumname)))
 
-(cffi:defcfun ("cpArbiterGetElasticity" #.(chipmunk-lispify "cpArbiterGetElasticity" 'function)) :double
+(clipmunk-defcfun ("cpArbiterGetElasticity" #.(chipmunk-lispify "cpArbiterGetElasticity" 'function)) :double
   (arb :pointer))
 
-(cffi:defcfun ("cpArbiterSetElasticity" #.(chipmunk-lispify "cpArbiterSetElasticity" 'function)) :void
+(clipmunk-defcfun ("cpArbiterSetElasticity" #.(chipmunk-lispify "cpArbiterSetElasticity" 'function)) :void
   (arb :pointer)
   (value :double))
 
-(cffi:defcfun ("cpArbiterGetFriction" #.(chipmunk-lispify "cpArbiterGetFriction" 'function)) :double
+(clipmunk-defcfun ("cpArbiterGetFriction" #.(chipmunk-lispify "cpArbiterGetFriction" 'function)) :double
   (arb :pointer))
 
-(cffi:defcfun ("cpArbiterSetFriction" #.(chipmunk-lispify "cpArbiterSetFriction" 'function)) :void
+(clipmunk-defcfun ("cpArbiterSetFriction" #.(chipmunk-lispify "cpArbiterSetFriction" 'function)) :void
   (arb :pointer)
   (value :double))
 
-(cffi:defcfun ("cpArbiterGetSurfaceVelocity" #.(chipmunk-lispify "cpArbiterGetSurfaceVelocity" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
+(clipmunk-defcfun ("cpArbiterGetSurfaceVelocity" #.(chipmunk-lispify "cpArbiterGetSurfaceVelocity" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
   (arb :pointer))
 
-(cffi:defcfun ("cpArbiterSetSurfaceVelocity" #.(chipmunk-lispify "cpArbiterSetSurfaceVelocity" 'function)) :void
+(clipmunk-defcfun ("cpArbiterSetSurfaceVelocity" #.(chipmunk-lispify "cpArbiterSetSurfaceVelocity" 'function)) :void
   (arb :pointer)
   (value-x :double) (value-y :double))
 
-(cffi:defcfun ("cpArbiterTotalKE" #.(chipmunk-lispify "cpArbiterTotalKE" 'function)) :double
+(clipmunk-defcfun ("cpArbiterTotalKE" #.(chipmunk-lispify "cpArbiterTotalKE" 'function)) :double
   (arb :pointer))
 
-(cffi:defcfun ("cpArbiterIgnore" #.(chipmunk-lispify "cpArbiterIgnore" 'function)) :void
+(clipmunk-defcfun ("cpArbiterIgnore" #.(chipmunk-lispify "cpArbiterIgnore" 'function)) :void
   (arb :pointer))
 
-(cffi:defcstruct #.(chipmunk-lispify "cpContactPointSet" 'classname)
+(clipmunk-defcstruct #.(chipmunk-lispify "cpContactPointSet" 'classname)
 	(#.(chipmunk-lispify "count" 'slotname) :int)
 	(#.(chipmunk-lispify "points" 'slotname) :pointer))
 
-(cffi:defcstruct #.(chipmunk-lispify "cpContactPointSet_points" 'classname)
+(clipmunk-defcstruct #.(chipmunk-lispify "cpContactPointSet_points" 'classname)
 	(point-x :double) (point-y :double)
 	(normal-x :double) (normal-y :double)
 	(#.(chipmunk-lispify "dist" 'slotname) :double))
 
-(cffi:defcfun ("cpArbiterGetContactPointSet" #.(chipmunk-lispify "cpArbiterGetContactPointSet" 'function)) #.(chipmunk-lispify "cpContactPointSet" 'classname)
+(clipmunk-defcfun ("cpArbiterGetContactPointSet" #.(chipmunk-lispify "cpArbiterGetContactPointSet" 'function)) #.(chipmunk-lispify "cpContactPointSet" 'classname)
   (arb :pointer))
 
-(cffi:defcfun ("cpArbiterGetCount" #.(chipmunk-lispify "cpArbiterGetCount" 'function)) :int
+(clipmunk-defcfun ("cpArbiterGetCount" #.(chipmunk-lispify "cpArbiterGetCount" 'function)) :int
   (arb :pointer))
 
-(cffi:defcfun ("cpArbiterGetDepth" #.(chipmunk-lispify "cpArbiterGetDepth" 'function)) :double
+(clipmunk-defcfun ("cpArbiterGetDepth" #.(chipmunk-lispify "cpArbiterGetDepth" 'function)) :double
   (arb :pointer)
   (i :int))
 
-(cffi:defcstruct #.(chipmunk-lispify "cpConstraintClass" 'classname)
+(clipmunk-defcstruct #.(chipmunk-lispify "cpConstraintClass" 'classname)
 	(#.(chipmunk-lispify "preStep" 'slotname) :pointer)
 	(#.(chipmunk-lispify "applyCachedImpulse" 'slotname) :pointer)
 	(#.(chipmunk-lispify "applyImpulse" 'slotname) :pointer)
 	(#.(chipmunk-lispify "getImpulse" 'slotname) :pointer))
 
-(cffi:defcstruct #.(chipmunk-lispify "cpConstraint" 'classname)
+(clipmunk-defcstruct #.(chipmunk-lispify "cpConstraint" 'classname)
 	(#.(chipmunk-lispify "klass_private" 'slotname) :pointer)
 	(#.(chipmunk-lispify "a" 'slotname) :pointer)
 	(#.(chipmunk-lispify "b" 'slotname) :pointer)
@@ -681,72 +696,72 @@
 	(#.(chipmunk-lispify "postSolve" 'slotname) :pointer)
 	(#.(chipmunk-lispify "data" 'slotname) :pointer))
 
-(cffi:defcfun ("cpConstraintDestroy" #.(chipmunk-lispify "cpConstraintDestroy" 'function)) :void
+(clipmunk-defcfun ("cpConstraintDestroy" #.(chipmunk-lispify "cpConstraintDestroy" 'function)) :void
   (constraint :pointer))
 
-(cffi:defcfun ("cpConstraintFree" #.(chipmunk-lispify "cpConstraintFree" 'function)) :void
+(clipmunk-defcfun ("cpConstraintFree" #.(chipmunk-lispify "cpConstraintFree" 'function)) :void
   (constraint :pointer))
 
-(cffi:defcfun ("cpConstraintActivateBodies" #.(chipmunk-lispify "cpConstraintActivateBodies" 'function)) :void
+(clipmunk-defcfun ("cpConstraintActivateBodies" #.(chipmunk-lispify "cpConstraintActivateBodies" 'function)) :void
   (constraint :pointer))
 
-(cffi:defcfun ("cpConstraintGetSpace" #.(chipmunk-lispify "cpConstraintGetSpace" 'function)) :pointer
+(clipmunk-defcfun ("cpConstraintGetSpace" #.(chipmunk-lispify "cpConstraintGetSpace" 'function)) :pointer
   (constraint :pointer))
 
-(cffi:defcfun ("cpConstraintGetA" #.(chipmunk-lispify "cpConstraintGetA" 'function)) :pointer
+(clipmunk-defcfun ("cpConstraintGetA" #.(chipmunk-lispify "cpConstraintGetA" 'function)) :pointer
   (constraint :pointer))
 
-(cffi:defcfun ("cpConstraintGetB" #.(chipmunk-lispify "cpConstraintGetB" 'function)) :pointer
+(clipmunk-defcfun ("cpConstraintGetB" #.(chipmunk-lispify "cpConstraintGetB" 'function)) :pointer
   (constraint :pointer))
 
-(cffi:defcfun ("cpConstraintGetMaxForce" #.(chipmunk-lispify "cpConstraintGetMaxForce" 'function)) :double
+(clipmunk-defcfun ("cpConstraintGetMaxForce" #.(chipmunk-lispify "cpConstraintGetMaxForce" 'function)) :double
   (constraint :pointer))
 
-(cffi:defcfun ("cpConstraintSetMaxForce" #.(chipmunk-lispify "cpConstraintSetMaxForce" 'function)) :void
+(clipmunk-defcfun ("cpConstraintSetMaxForce" #.(chipmunk-lispify "cpConstraintSetMaxForce" 'function)) :void
   (constraint :pointer)
   (value :double))
 
-(cffi:defcfun ("cpConstraintGetErrorBias" #.(chipmunk-lispify "cpConstraintGetErrorBias" 'function)) :double
+(clipmunk-defcfun ("cpConstraintGetErrorBias" #.(chipmunk-lispify "cpConstraintGetErrorBias" 'function)) :double
   (constraint :pointer))
 
-(cffi:defcfun ("cpConstraintSetErrorBias" #.(chipmunk-lispify "cpConstraintSetErrorBias" 'function)) :void
+(clipmunk-defcfun ("cpConstraintSetErrorBias" #.(chipmunk-lispify "cpConstraintSetErrorBias" 'function)) :void
   (constraint :pointer)
   (value :double))
 
-(cffi:defcfun ("cpConstraintGetMaxBias" #.(chipmunk-lispify "cpConstraintGetMaxBias" 'function)) :double
+(clipmunk-defcfun ("cpConstraintGetMaxBias" #.(chipmunk-lispify "cpConstraintGetMaxBias" 'function)) :double
   (constraint :pointer))
 
-(cffi:defcfun ("cpConstraintSetMaxBias" #.(chipmunk-lispify "cpConstraintSetMaxBias" 'function)) :void
+(clipmunk-defcfun ("cpConstraintSetMaxBias" #.(chipmunk-lispify "cpConstraintSetMaxBias" 'function)) :void
   (constraint :pointer)
   (value :double))
 
-(cffi:defcfun ("cpConstraintGetPreSolveFunc" #.(chipmunk-lispify "cpConstraintGetPreSolveFunc" 'function)) :pointer
+(clipmunk-defcfun ("cpConstraintGetPreSolveFunc" #.(chipmunk-lispify "cpConstraintGetPreSolveFunc" 'function)) :pointer
   (constraint :pointer))
 
-(cffi:defcfun ("cpConstraintSetPreSolveFunc" #.(chipmunk-lispify "cpConstraintSetPreSolveFunc" 'function)) :void
+(clipmunk-defcfun ("cpConstraintSetPreSolveFunc" #.(chipmunk-lispify "cpConstraintSetPreSolveFunc" 'function)) :void
   (constraint :pointer)
   (value :pointer))
 
-(cffi:defcfun ("cpConstraintGetPostSolveFunc" #.(chipmunk-lispify "cpConstraintGetPostSolveFunc" 'function)) :pointer
+(clipmunk-defcfun ("cpConstraintGetPostSolveFunc" #.(chipmunk-lispify "cpConstraintGetPostSolveFunc" 'function)) :pointer
   (constraint :pointer))
 
-(cffi:defcfun ("cpConstraintSetPostSolveFunc" #.(chipmunk-lispify "cpConstraintSetPostSolveFunc" 'function)) :void
+(clipmunk-defcfun ("cpConstraintSetPostSolveFunc" #.(chipmunk-lispify "cpConstraintSetPostSolveFunc" 'function)) :void
   (constraint :pointer)
   (value :pointer))
 
-(cffi:defcfun ("cpConstraintGetUserData" #.(chipmunk-lispify "cpConstraintGetUserData" 'function)) :pointer
+(clipmunk-defcfun ("cpConstraintGetUserData" #.(chipmunk-lispify "cpConstraintGetUserData" 'function)) :pointer
   (constraint :pointer))
 
-(cffi:defcfun ("cpConstraintSetUserData" #.(chipmunk-lispify "cpConstraintSetUserData" 'function)) :void
+(clipmunk-defcfun ("cpConstraintSetUserData" #.(chipmunk-lispify "cpConstraintSetUserData" 'function)) :void
   (constraint :pointer)
   (value :pointer))
 
-(cffi:defcfun ("cpConstraintGetImpulse" #.(chipmunk-lispify "cpConstraintGetImpulse" 'function)) :double
+(clipmunk-defcfun ("cpConstraintGetImpulse" #.(chipmunk-lispify "cpConstraintGetImpulse" 'function)) :double
   (constraint :pointer))
 
-(cffi:defcfun ("cpDampedRotarySpringGetClass" #.(chipmunk-lispify "cpDampedRotarySpringGetClass" 'function)) :pointer)
+(clipmunk-defcfun ("cpDampedRotarySpringGetClass" #.(chipmunk-lispify "cpDampedRotarySpringGetClass" 'function)) :pointer)
 
-(cffi:defcstruct #.(chipmunk-lispify "cpDampedRotarySpring" 'classname)
+(clipmunk-defcstruct #.(chipmunk-lispify "cpDampedRotarySpring" 'classname)
 	(#.(chipmunk-lispify "constraint" 'slotname) #.(chipmunk-lispify "cpConstraint" 'classname))
 	(#.(chipmunk-lispify "restAngle" 'slotname) :double)
 	(#.(chipmunk-lispify "stiffness" 'slotname) :double)
@@ -756,9 +771,9 @@
 	(#.(chipmunk-lispify "w_coef" 'slotname) :double)
 	(#.(chipmunk-lispify "iSum" 'slotname) :double))
 
-(cffi:defcfun ("cpDampedRotarySpringAlloc" #.(chipmunk-lispify "cpDampedRotarySpringAlloc" 'function)) :pointer)
+(clipmunk-defcfun ("cpDampedRotarySpringAlloc" #.(chipmunk-lispify "cpDampedRotarySpringAlloc" 'function)) :pointer)
 
-(cffi:defcfun ("cpDampedRotarySpringInit" #.(chipmunk-lispify "cpDampedRotarySpringInit" 'function)) :pointer
+(clipmunk-defcfun ("cpDampedRotarySpringInit" #.(chipmunk-lispify "cpDampedRotarySpringInit" 'function)) :pointer
   (joint :pointer)
   (a :pointer)
   (b :pointer)
@@ -766,44 +781,44 @@
   (stiffness :double)
   (damping :double))
 
-(cffi:defcfun ("cpDampedRotarySpringNew" #.(chipmunk-lispify "cpDampedRotarySpringNew" 'function)) :pointer
+(clipmunk-defcfun ("cpDampedRotarySpringNew" #.(chipmunk-lispify "cpDampedRotarySpringNew" 'function)) :pointer
   (a :pointer)
   (b :pointer)
   (restAngle :double)
   (stiffness :double)
   (damping :double))
 
-(cffi:defcfun ("cpDampedRotarySpringGetRestAngle" #.(chipmunk-lispify "cpDampedRotarySpringGetRestAngle" 'function)) :double
+(clipmunk-defcfun ("cpDampedRotarySpringGetRestAngle" #.(chipmunk-lispify "cpDampedRotarySpringGetRestAngle" 'function)) :double
   (constraint :pointer))
 
-(cffi:defcfun ("cpDampedRotarySpringSetRestAngle" #.(chipmunk-lispify "cpDampedRotarySpringSetRestAngle" 'function)) :void
+(clipmunk-defcfun ("cpDampedRotarySpringSetRestAngle" #.(chipmunk-lispify "cpDampedRotarySpringSetRestAngle" 'function)) :void
   (constraint :pointer)
   (value :double))
 
-(cffi:defcfun ("cpDampedRotarySpringGetStiffness" #.(chipmunk-lispify "cpDampedRotarySpringGetStiffness" 'function)) :double
+(clipmunk-defcfun ("cpDampedRotarySpringGetStiffness" #.(chipmunk-lispify "cpDampedRotarySpringGetStiffness" 'function)) :double
   (constraint :pointer))
 
-(cffi:defcfun ("cpDampedRotarySpringSetStiffness" #.(chipmunk-lispify "cpDampedRotarySpringSetStiffness" 'function)) :void
+(clipmunk-defcfun ("cpDampedRotarySpringSetStiffness" #.(chipmunk-lispify "cpDampedRotarySpringSetStiffness" 'function)) :void
   (constraint :pointer)
   (value :double))
 
-(cffi:defcfun ("cpDampedRotarySpringGetDamping" #.(chipmunk-lispify "cpDampedRotarySpringGetDamping" 'function)) :double
+(clipmunk-defcfun ("cpDampedRotarySpringGetDamping" #.(chipmunk-lispify "cpDampedRotarySpringGetDamping" 'function)) :double
   (constraint :pointer))
 
-(cffi:defcfun ("cpDampedRotarySpringSetDamping" #.(chipmunk-lispify "cpDampedRotarySpringSetDamping" 'function)) :void
+(clipmunk-defcfun ("cpDampedRotarySpringSetDamping" #.(chipmunk-lispify "cpDampedRotarySpringSetDamping" 'function)) :void
   (constraint :pointer)
   (value :double))
 
-(cffi:defcfun ("cpDampedRotarySpringGetSpringTorqueFunc" #.(chipmunk-lispify "cpDampedRotarySpringGetSpringTorqueFunc" 'function)) :pointer
+(clipmunk-defcfun ("cpDampedRotarySpringGetSpringTorqueFunc" #.(chipmunk-lispify "cpDampedRotarySpringGetSpringTorqueFunc" 'function)) :pointer
   (constraint :pointer))
 
-(cffi:defcfun ("cpDampedRotarySpringSetSpringTorqueFunc" #.(chipmunk-lispify "cpDampedRotarySpringSetSpringTorqueFunc" 'function)) :void
+(clipmunk-defcfun ("cpDampedRotarySpringSetSpringTorqueFunc" #.(chipmunk-lispify "cpDampedRotarySpringSetSpringTorqueFunc" 'function)) :void
   (constraint :pointer)
   (value :pointer))
 
-(cffi:defcfun ("cpDampedSpringGetClass" #.(chipmunk-lispify "cpDampedSpringGetClass" 'function)) :pointer)
+(clipmunk-defcfun ("cpDampedSpringGetClass" #.(chipmunk-lispify "cpDampedSpringGetClass" 'function)) :pointer)
 
-(cffi:defcstruct #.(chipmunk-lispify "cpDampedSpring" 'classname)
+(clipmunk-defcstruct #.(chipmunk-lispify "cpDampedSpring" 'classname)
 	(#.(chipmunk-lispify "constraint" 'slotname) #.(chipmunk-lispify "cpConstraint" 'classname))
 	(anchr1-x :double) (anchr1-y :double)
 	(anchr2-x :double) (anchr2-y :double)
@@ -818,9 +833,9 @@
 	(#.(chipmunk-lispify "nMass" 'slotname) :double)
 	(n-x :double) (n-y :double))
 
-(cffi:defcfun ("cpDampedSpringAlloc" #.(chipmunk-lispify "cpDampedSpringAlloc" 'function)) :pointer)
+(clipmunk-defcfun ("cpDampedSpringAlloc" #.(chipmunk-lispify "cpDampedSpringAlloc" 'function)) :pointer)
 
-(cffi:defcfun ("cpDampedSpringInit" #.(chipmunk-lispify "cpDampedSpringInit" 'function)) :pointer
+(clipmunk-defcfun ("cpDampedSpringInit" #.(chipmunk-lispify "cpDampedSpringInit" 'function)) :pointer
   (joint :pointer)
   (a :pointer)
   (b :pointer)
@@ -830,7 +845,7 @@
   (stiffness :double)
   (damping :double))
 
-(cffi:defcfun ("cpDampedSpringNew" #.(chipmunk-lispify "cpDampedSpringNew" 'function)) :pointer
+(clipmunk-defcfun ("cpDampedSpringNew" #.(chipmunk-lispify "cpDampedSpringNew" 'function)) :pointer
   (a :pointer)
   (b :pointer)
   (anchr1-x :double) (anchr1-y :double)
@@ -839,51 +854,51 @@
   (stiffness :double)
   (damping :double))
 
-(cffi:defcfun ("cpDampedSpringGetAnchr1" #.(chipmunk-lispify "cpDampedSpringGetAnchr1" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
+(clipmunk-defcfun ("cpDampedSpringGetAnchr1" #.(chipmunk-lispify "cpDampedSpringGetAnchr1" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
   (constraint :pointer))
 
-(cffi:defcfun ("cpDampedSpringSetAnchr1" #.(chipmunk-lispify "cpDampedSpringSetAnchr1" 'function)) :void
+(clipmunk-defcfun ("cpDampedSpringSetAnchr1" #.(chipmunk-lispify "cpDampedSpringSetAnchr1" 'function)) :void
   (constraint :pointer)
   (value-x :double) (value-y :double))
 
-(cffi:defcfun ("cpDampedSpringGetAnchr2" #.(chipmunk-lispify "cpDampedSpringGetAnchr2" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
+(clipmunk-defcfun ("cpDampedSpringGetAnchr2" #.(chipmunk-lispify "cpDampedSpringGetAnchr2" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
   (constraint :pointer))
 
-(cffi:defcfun ("cpDampedSpringSetAnchr2" #.(chipmunk-lispify "cpDampedSpringSetAnchr2" 'function)) :void
+(clipmunk-defcfun ("cpDampedSpringSetAnchr2" #.(chipmunk-lispify "cpDampedSpringSetAnchr2" 'function)) :void
   (constraint :pointer)
   (value-x :double) (value-y :double))
 
-(cffi:defcfun ("cpDampedSpringGetRestLength" #.(chipmunk-lispify "cpDampedSpringGetRestLength" 'function)) :double
+(clipmunk-defcfun ("cpDampedSpringGetRestLength" #.(chipmunk-lispify "cpDampedSpringGetRestLength" 'function)) :double
   (constraint :pointer))
 
-(cffi:defcfun ("cpDampedSpringSetRestLength" #.(chipmunk-lispify "cpDampedSpringSetRestLength" 'function)) :void
+(clipmunk-defcfun ("cpDampedSpringSetRestLength" #.(chipmunk-lispify "cpDampedSpringSetRestLength" 'function)) :void
   (constraint :pointer)
   (value :double))
 
-(cffi:defcfun ("cpDampedSpringGetStiffness" #.(chipmunk-lispify "cpDampedSpringGetStiffness" 'function)) :double
+(clipmunk-defcfun ("cpDampedSpringGetStiffness" #.(chipmunk-lispify "cpDampedSpringGetStiffness" 'function)) :double
   (constraint :pointer))
 
-(cffi:defcfun ("cpDampedSpringSetStiffness" #.(chipmunk-lispify "cpDampedSpringSetStiffness" 'function)) :void
+(clipmunk-defcfun ("cpDampedSpringSetStiffness" #.(chipmunk-lispify "cpDampedSpringSetStiffness" 'function)) :void
   (constraint :pointer)
   (value :double))
 
-(cffi:defcfun ("cpDampedSpringGetDamping" #.(chipmunk-lispify "cpDampedSpringGetDamping" 'function)) :double
+(clipmunk-defcfun ("cpDampedSpringGetDamping" #.(chipmunk-lispify "cpDampedSpringGetDamping" 'function)) :double
   (constraint :pointer))
 
-(cffi:defcfun ("cpDampedSpringSetDamping" #.(chipmunk-lispify "cpDampedSpringSetDamping" 'function)) :void
+(clipmunk-defcfun ("cpDampedSpringSetDamping" #.(chipmunk-lispify "cpDampedSpringSetDamping" 'function)) :void
   (constraint :pointer)
   (value :double))
 
-(cffi:defcfun ("cpDampedSpringGetSpringForceFunc" #.(chipmunk-lispify "cpDampedSpringGetSpringForceFunc" 'function)) :pointer
+(clipmunk-defcfun ("cpDampedSpringGetSpringForceFunc" #.(chipmunk-lispify "cpDampedSpringGetSpringForceFunc" 'function)) :pointer
   (constraint :pointer))
 
-(cffi:defcfun ("cpDampedSpringSetSpringForceFunc" #.(chipmunk-lispify "cpDampedSpringSetSpringForceFunc" 'function)) :void
+(clipmunk-defcfun ("cpDampedSpringSetSpringForceFunc" #.(chipmunk-lispify "cpDampedSpringSetSpringForceFunc" 'function)) :void
   (constraint :pointer)
   (value :pointer))
 
-(cffi:defcfun ("cpGearJointGetClass" #.(chipmunk-lispify "cpGearJointGetClass" 'function)) :pointer)
+(clipmunk-defcfun ("cpGearJointGetClass" #.(chipmunk-lispify "cpGearJointGetClass" 'function)) :pointer)
 
-(cffi:defcstruct #.(chipmunk-lispify "cpGearJoint" 'classname)
+(clipmunk-defcstruct #.(chipmunk-lispify "cpGearJoint" 'classname)
 	(#.(chipmunk-lispify "constraint" 'slotname) #.(chipmunk-lispify "cpConstraint" 'classname))
 	(#.(chipmunk-lispify "phase" 'slotname) :double)
 	(#.(chipmunk-lispify "ratio" 'slotname) :double)
@@ -893,38 +908,38 @@
 	(#.(chipmunk-lispify "jAcc" 'slotname) :double)
 	(#.(chipmunk-lispify "jMax" 'slotname) :double))
 
-(cffi:defcfun ("cpGearJointAlloc" #.(chipmunk-lispify "cpGearJointAlloc" 'function)) :pointer)
+(clipmunk-defcfun ("cpGearJointAlloc" #.(chipmunk-lispify "cpGearJointAlloc" 'function)) :pointer)
 
-(cffi:defcfun ("cpGearJointInit" #.(chipmunk-lispify "cpGearJointInit" 'function)) :pointer
+(clipmunk-defcfun ("cpGearJointInit" #.(chipmunk-lispify "cpGearJointInit" 'function)) :pointer
   (joint :pointer)
   (a :pointer)
   (b :pointer)
   (phase :double)
   (ratio :double))
 
-(cffi:defcfun ("cpGearJointNew" #.(chipmunk-lispify "cpGearJointNew" 'function)) :pointer
+(clipmunk-defcfun ("cpGearJointNew" #.(chipmunk-lispify "cpGearJointNew" 'function)) :pointer
   (a :pointer)
   (b :pointer)
   (phase :double)
   (ratio :double))
 
-(cffi:defcfun ("cpGearJointGetPhase" #.(chipmunk-lispify "cpGearJointGetPhase" 'function)) :double
+(clipmunk-defcfun ("cpGearJointGetPhase" #.(chipmunk-lispify "cpGearJointGetPhase" 'function)) :double
   (constraint :pointer))
 
-(cffi:defcfun ("cpGearJointSetPhase" #.(chipmunk-lispify "cpGearJointSetPhase" 'function)) :void
+(clipmunk-defcfun ("cpGearJointSetPhase" #.(chipmunk-lispify "cpGearJointSetPhase" 'function)) :void
   (constraint :pointer)
   (value :double))
 
-(cffi:defcfun ("cpGearJointGetRatio" #.(chipmunk-lispify "cpGearJointGetRatio" 'function)) :double
+(clipmunk-defcfun ("cpGearJointGetRatio" #.(chipmunk-lispify "cpGearJointGetRatio" 'function)) :double
   (constraint :pointer))
 
-(cffi:defcfun ("cpGearJointSetRatio" #.(chipmunk-lispify "cpGearJointSetRatio" 'function)) :void
+(clipmunk-defcfun ("cpGearJointSetRatio" #.(chipmunk-lispify "cpGearJointSetRatio" 'function)) :void
   (constraint :pointer)
   (value :double))
 
-(cffi:defcfun ("cpGrooveJointGetClass" #.(chipmunk-lispify "cpGrooveJointGetClass" 'function)) :pointer)
+(clipmunk-defcfun ("cpGrooveJointGetClass" #.(chipmunk-lispify "cpGrooveJointGetClass" 'function)) :pointer)
 
-(cffi:defcstruct #.(chipmunk-lispify "cpGrooveJoint" 'classname)
+(clipmunk-defcstruct #.(chipmunk-lispify "cpGrooveJoint" 'classname)
 	(#.(chipmunk-lispify "constraint" 'slotname) #.(chipmunk-lispify "cpConstraint" 'classname))
 	(grv_n-x :double) (grv_n-y :double)
 	(grv_a-x :double) (grv_a-y :double)
@@ -940,9 +955,9 @@
 	(#.(chipmunk-lispify "jMaxLen" 'slotname) :double)
 	(bias-x :double) (bias-y :double))
 
-(cffi:defcfun ("cpGrooveJointAlloc" #.(chipmunk-lispify "cpGrooveJointAlloc" 'function)) :pointer)
+(clipmunk-defcfun ("cpGrooveJointAlloc" #.(chipmunk-lispify "cpGrooveJointAlloc" 'function)) :pointer)
 
-(cffi:defcfun ("cpGrooveJointInit" #.(chipmunk-lispify "cpGrooveJointInit" 'function)) :pointer
+(clipmunk-defcfun ("cpGrooveJointInit" #.(chipmunk-lispify "cpGrooveJointInit" 'function)) :pointer
   (joint :pointer)
   (a :pointer)
   (b :pointer)
@@ -950,37 +965,37 @@
   (groove_b-x :double) (groove_b-y :double)
   (anchr2-x :double) (anchr2-y :double))
 
-(cffi:defcfun ("cpGrooveJointNew" #.(chipmunk-lispify "cpGrooveJointNew" 'function)) :pointer
+(clipmunk-defcfun ("cpGrooveJointNew" #.(chipmunk-lispify "cpGrooveJointNew" 'function)) :pointer
   (a :pointer)
   (b :pointer)
   (groove_a-x :double) (groove_a-y :double)
   (groove_b-x :double) (groove_b-y :double)
   (anchr2-x :double) (anchr2-y :double))
 
-(cffi:defcfun ("cpGrooveJointGetGrooveA" #.(chipmunk-lispify "cpGrooveJointGetGrooveA" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
+(clipmunk-defcfun ("cpGrooveJointGetGrooveA" #.(chipmunk-lispify "cpGrooveJointGetGrooveA" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
   (constraint :pointer))
 
-(cffi:defcfun ("cpGrooveJointSetGrooveA" #.(chipmunk-lispify "cpGrooveJointSetGrooveA" 'function)) :void
+(clipmunk-defcfun ("cpGrooveJointSetGrooveA" #.(chipmunk-lispify "cpGrooveJointSetGrooveA" 'function)) :void
   (constraint :pointer)
   (value-x :double) (value-y :double))
 
-(cffi:defcfun ("cpGrooveJointGetGrooveB" #.(chipmunk-lispify "cpGrooveJointGetGrooveB" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
+(clipmunk-defcfun ("cpGrooveJointGetGrooveB" #.(chipmunk-lispify "cpGrooveJointGetGrooveB" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
   (constraint :pointer))
 
-(cffi:defcfun ("cpGrooveJointSetGrooveB" #.(chipmunk-lispify "cpGrooveJointSetGrooveB" 'function)) :void
+(clipmunk-defcfun ("cpGrooveJointSetGrooveB" #.(chipmunk-lispify "cpGrooveJointSetGrooveB" 'function)) :void
   (constraint :pointer)
   (value-x :double) (value-y :double))
 
-(cffi:defcfun ("cpGrooveJointGetAnchr2" #.(chipmunk-lispify "cpGrooveJointGetAnchr2" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
+(clipmunk-defcfun ("cpGrooveJointGetAnchr2" #.(chipmunk-lispify "cpGrooveJointGetAnchr2" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
   (constraint :pointer))
 
-(cffi:defcfun ("cpGrooveJointSetAnchr2" #.(chipmunk-lispify "cpGrooveJointSetAnchr2" 'function)) :void
+(clipmunk-defcfun ("cpGrooveJointSetAnchr2" #.(chipmunk-lispify "cpGrooveJointSetAnchr2" 'function)) :void
   (constraint :pointer)
   (value-x :double) (value-y :double))
 
-(cffi:defcfun ("cpPinJointGetClass" #.(chipmunk-lispify "cpPinJointGetClass" 'function)) :pointer)
+(clipmunk-defcfun ("cpPinJointGetClass" #.(chipmunk-lispify "cpPinJointGetClass" 'function)) :pointer)
 
-(cffi:defcstruct #.(chipmunk-lispify "cpPinJoint" 'classname)
+(clipmunk-defcstruct #.(chipmunk-lispify "cpPinJoint" 'classname)
 	(#.(chipmunk-lispify "constraint" 'slotname) #.(chipmunk-lispify "cpConstraint" 'classname))
 	(anchr1-x :double) (anchr1-y :double)
 	(anchr2-x :double) (anchr2-y :double)
@@ -993,45 +1008,45 @@
 	(#.(chipmunk-lispify "jnMax" 'slotname) :double)
 	(#.(chipmunk-lispify "bias" 'slotname) :double))
 
-(cffi:defcfun ("cpPinJointAlloc" #.(chipmunk-lispify "cpPinJointAlloc" 'function)) :pointer)
+(clipmunk-defcfun ("cpPinJointAlloc" #.(chipmunk-lispify "cpPinJointAlloc" 'function)) :pointer)
 
-(cffi:defcfun ("cpPinJointInit" #.(chipmunk-lispify "cpPinJointInit" 'function)) :pointer
+(clipmunk-defcfun ("cpPinJointInit" #.(chipmunk-lispify "cpPinJointInit" 'function)) :pointer
   (joint :pointer)
   (a :pointer)
   (b :pointer)
   (anchr1-x :double) (anchr1-y :double)
   (anchr2-x :double) (anchr2-y :double))
 
-(cffi:defcfun ("cpPinJointNew" #.(chipmunk-lispify "cpPinJointNew" 'function)) :pointer
+(clipmunk-defcfun ("cpPinJointNew" #.(chipmunk-lispify "cpPinJointNew" 'function)) :pointer
   (a :pointer)
   (b :pointer)
   (anchr1-x :double) (anchr1-y :double)
   (anchr2-x :double) (anchr2-y :double))
 
-(cffi:defcfun ("cpPinJointGetAnchr1" #.(chipmunk-lispify "cpPinJointGetAnchr1" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
+(clipmunk-defcfun ("cpPinJointGetAnchr1" #.(chipmunk-lispify "cpPinJointGetAnchr1" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
   (constraint :pointer))
 
-(cffi:defcfun ("cpPinJointSetAnchr1" #.(chipmunk-lispify "cpPinJointSetAnchr1" 'function)) :void
+(clipmunk-defcfun ("cpPinJointSetAnchr1" #.(chipmunk-lispify "cpPinJointSetAnchr1" 'function)) :void
   (constraint :pointer)
   (value-x :double) (value-y :double))
 
-(cffi:defcfun ("cpPinJointGetAnchr2" #.(chipmunk-lispify "cpPinJointGetAnchr2" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
+(clipmunk-defcfun ("cpPinJointGetAnchr2" #.(chipmunk-lispify "cpPinJointGetAnchr2" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
   (constraint :pointer))
 
-(cffi:defcfun ("cpPinJointSetAnchr2" #.(chipmunk-lispify "cpPinJointSetAnchr2" 'function)) :void
+(clipmunk-defcfun ("cpPinJointSetAnchr2" #.(chipmunk-lispify "cpPinJointSetAnchr2" 'function)) :void
   (constraint :pointer)
   (value-x :double) (value-y :double))
 
-(cffi:defcfun ("cpPinJointGetDist" #.(chipmunk-lispify "cpPinJointGetDist" 'function)) :double
+(clipmunk-defcfun ("cpPinJointGetDist" #.(chipmunk-lispify "cpPinJointGetDist" 'function)) :double
   (constraint :pointer))
 
-(cffi:defcfun ("cpPinJointSetDist" #.(chipmunk-lispify "cpPinJointSetDist" 'function)) :void
+(clipmunk-defcfun ("cpPinJointSetDist" #.(chipmunk-lispify "cpPinJointSetDist" 'function)) :void
   (constraint :pointer)
   (value :double))
 
-(cffi:defcfun ("cpPivotJointGetClass" #.(chipmunk-lispify "cpPivotJointGetClass" 'function)) :pointer)
+(clipmunk-defcfun ("cpPivotJointGetClass" #.(chipmunk-lispify "cpPivotJointGetClass" 'function)) :pointer)
 
-(cffi:defcstruct #.(chipmunk-lispify "cpPivotJoint" 'classname)
+(clipmunk-defcstruct #.(chipmunk-lispify "cpPivotJoint" 'classname)
 	(#.(chipmunk-lispify "constraint" 'slotname) #.(chipmunk-lispify "cpConstraint" 'classname))
 	(anchr1-x :double) (anchr1-y :double)
 	(anchr2-x :double) (anchr2-y :double)
@@ -1043,43 +1058,43 @@
 	(#.(chipmunk-lispify "jMaxLen" 'slotname) :double)
 	(bias-x :double) (bias-y :double))
 
-(cffi:defcfun ("cpPivotJointAlloc" #.(chipmunk-lispify "cpPivotJointAlloc" 'function)) :pointer)
+(clipmunk-defcfun ("cpPivotJointAlloc" #.(chipmunk-lispify "cpPivotJointAlloc" 'function)) :pointer)
 
-(cffi:defcfun ("cpPivotJointInit" #.(chipmunk-lispify "cpPivotJointInit" 'function)) :pointer
+(clipmunk-defcfun ("cpPivotJointInit" #.(chipmunk-lispify "cpPivotJointInit" 'function)) :pointer
   (joint :pointer)
   (a :pointer)
   (b :pointer)
   (anchr1-x :double) (anchr1-y :double)
   (anchr2-x :double) (anchr2-y :double))
 
-(cffi:defcfun ("cpPivotJointNew" #.(chipmunk-lispify "cpPivotJointNew" 'function)) :pointer
+(clipmunk-defcfun ("cpPivotJointNew" #.(chipmunk-lispify "cpPivotJointNew" 'function)) :pointer
   (a :pointer)
   (b :pointer)
   (pivot-x :double) (pivot-y :double))
 
-(cffi:defcfun ("cpPivotJointNew2" #.(chipmunk-lispify "cpPivotJointNew2" 'function)) :pointer
+(clipmunk-defcfun ("cpPivotJointNew2" #.(chipmunk-lispify "cpPivotJointNew2" 'function)) :pointer
   (a :pointer)
   (b :pointer)
   (anchr1-x :double) (anchr1-y :double)
   (anchr2-x :double) (anchr2-y :double))
 
-(cffi:defcfun ("cpPivotJointGetAnchr1" #.(chipmunk-lispify "cpPivotJointGetAnchr1" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
+(clipmunk-defcfun ("cpPivotJointGetAnchr1" #.(chipmunk-lispify "cpPivotJointGetAnchr1" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
   (constraint :pointer))
 
-(cffi:defcfun ("cpPivotJointSetAnchr1" #.(chipmunk-lispify "cpPivotJointSetAnchr1" 'function)) :void
+(clipmunk-defcfun ("cpPivotJointSetAnchr1" #.(chipmunk-lispify "cpPivotJointSetAnchr1" 'function)) :void
   (constraint :pointer)
   (value-x :double) (value-y :double))
 
-(cffi:defcfun ("cpPivotJointGetAnchr2" #.(chipmunk-lispify "cpPivotJointGetAnchr2" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
+(clipmunk-defcfun ("cpPivotJointGetAnchr2" #.(chipmunk-lispify "cpPivotJointGetAnchr2" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
   (constraint :pointer))
 
-(cffi:defcfun ("cpPivotJointSetAnchr2" #.(chipmunk-lispify "cpPivotJointSetAnchr2" 'function)) :void
+(clipmunk-defcfun ("cpPivotJointSetAnchr2" #.(chipmunk-lispify "cpPivotJointSetAnchr2" 'function)) :void
   (constraint :pointer)
   (value-x :double) (value-y :double))
 
-(cffi:defcfun ("cpRatchetJointGetClass" #.(chipmunk-lispify "cpRatchetJointGetClass" 'function)) :pointer)
+(clipmunk-defcfun ("cpRatchetJointGetClass" #.(chipmunk-lispify "cpRatchetJointGetClass" 'function)) :pointer)
 
-(cffi:defcstruct #.(chipmunk-lispify "cpRatchetJoint" 'classname)
+(clipmunk-defcstruct #.(chipmunk-lispify "cpRatchetJoint" 'classname)
 	(#.(chipmunk-lispify "constraint" 'slotname) #.(chipmunk-lispify "cpConstraint" 'classname))
 	(#.(chipmunk-lispify "angle" 'slotname) :double)
 	(#.(chipmunk-lispify "phase" 'slotname) :double)
@@ -1089,45 +1104,45 @@
 	(#.(chipmunk-lispify "jAcc" 'slotname) :double)
 	(#.(chipmunk-lispify "jMax" 'slotname) :double))
 
-(cffi:defcfun ("cpRatchetJointAlloc" #.(chipmunk-lispify "cpRatchetJointAlloc" 'function)) :pointer)
+(clipmunk-defcfun ("cpRatchetJointAlloc" #.(chipmunk-lispify "cpRatchetJointAlloc" 'function)) :pointer)
 
-(cffi:defcfun ("cpRatchetJointInit" #.(chipmunk-lispify "cpRatchetJointInit" 'function)) :pointer
+(clipmunk-defcfun ("cpRatchetJointInit" #.(chipmunk-lispify "cpRatchetJointInit" 'function)) :pointer
   (joint :pointer)
   (a :pointer)
   (b :pointer)
   (phase :double)
   (ratchet :double))
 
-(cffi:defcfun ("cpRatchetJointNew" #.(chipmunk-lispify "cpRatchetJointNew" 'function)) :pointer
+(clipmunk-defcfun ("cpRatchetJointNew" #.(chipmunk-lispify "cpRatchetJointNew" 'function)) :pointer
   (a :pointer)
   (b :pointer)
   (phase :double)
   (ratchet :double))
 
-(cffi:defcfun ("cpRatchetJointGetAngle" #.(chipmunk-lispify "cpRatchetJointGetAngle" 'function)) :double
+(clipmunk-defcfun ("cpRatchetJointGetAngle" #.(chipmunk-lispify "cpRatchetJointGetAngle" 'function)) :double
   (constraint :pointer))
 
-(cffi:defcfun ("cpRatchetJointSetAngle" #.(chipmunk-lispify "cpRatchetJointSetAngle" 'function)) :void
+(clipmunk-defcfun ("cpRatchetJointSetAngle" #.(chipmunk-lispify "cpRatchetJointSetAngle" 'function)) :void
   (constraint :pointer)
   (value :double))
 
-(cffi:defcfun ("cpRatchetJointGetPhase" #.(chipmunk-lispify "cpRatchetJointGetPhase" 'function)) :double
+(clipmunk-defcfun ("cpRatchetJointGetPhase" #.(chipmunk-lispify "cpRatchetJointGetPhase" 'function)) :double
   (constraint :pointer))
 
-(cffi:defcfun ("cpRatchetJointSetPhase" #.(chipmunk-lispify "cpRatchetJointSetPhase" 'function)) :void
+(clipmunk-defcfun ("cpRatchetJointSetPhase" #.(chipmunk-lispify "cpRatchetJointSetPhase" 'function)) :void
   (constraint :pointer)
   (value :double))
 
-(cffi:defcfun ("cpRatchetJointGetRatchet" #.(chipmunk-lispify "cpRatchetJointGetRatchet" 'function)) :double
+(clipmunk-defcfun ("cpRatchetJointGetRatchet" #.(chipmunk-lispify "cpRatchetJointGetRatchet" 'function)) :double
   (constraint :pointer))
 
-(cffi:defcfun ("cpRatchetJointSetRatchet" #.(chipmunk-lispify "cpRatchetJointSetRatchet" 'function)) :void
+(clipmunk-defcfun ("cpRatchetJointSetRatchet" #.(chipmunk-lispify "cpRatchetJointSetRatchet" 'function)) :void
   (constraint :pointer)
   (value :double))
 
-(cffi:defcfun ("cpRotaryLimitJointGetClass" #.(chipmunk-lispify "cpRotaryLimitJointGetClass" 'function)) :pointer)
+(clipmunk-defcfun ("cpRotaryLimitJointGetClass" #.(chipmunk-lispify "cpRotaryLimitJointGetClass" 'function)) :pointer)
 
-(cffi:defcstruct #.(chipmunk-lispify "cpRotaryLimitJoint" 'classname)
+(clipmunk-defcstruct #.(chipmunk-lispify "cpRotaryLimitJoint" 'classname)
 	(#.(chipmunk-lispify "constraint" 'slotname) #.(chipmunk-lispify "cpConstraint" 'classname))
 	(#.(chipmunk-lispify "min" 'slotname) :double)
 	(#.(chipmunk-lispify "max" 'slotname) :double)
@@ -1136,67 +1151,67 @@
 	(#.(chipmunk-lispify "jAcc" 'slotname) :double)
 	(#.(chipmunk-lispify "jMax" 'slotname) :double))
 
-(cffi:defcfun ("cpRotaryLimitJointAlloc" #.(chipmunk-lispify "cpRotaryLimitJointAlloc" 'function)) :pointer)
+(clipmunk-defcfun ("cpRotaryLimitJointAlloc" #.(chipmunk-lispify "cpRotaryLimitJointAlloc" 'function)) :pointer)
 
-(cffi:defcfun ("cpRotaryLimitJointInit" #.(chipmunk-lispify "cpRotaryLimitJointInit" 'function)) :pointer
+(clipmunk-defcfun ("cpRotaryLimitJointInit" #.(chipmunk-lispify "cpRotaryLimitJointInit" 'function)) :pointer
   (joint :pointer)
   (a :pointer)
   (b :pointer)
   (min :double)
   (max :double))
 
-(cffi:defcfun ("cpRotaryLimitJointNew" #.(chipmunk-lispify "cpRotaryLimitJointNew" 'function)) :pointer
+(clipmunk-defcfun ("cpRotaryLimitJointNew" #.(chipmunk-lispify "cpRotaryLimitJointNew" 'function)) :pointer
   (a :pointer)
   (b :pointer)
   (min :double)
   (max :double))
 
-(cffi:defcfun ("cpRotaryLimitJointGetMin" #.(chipmunk-lispify "cpRotaryLimitJointGetMin" 'function)) :double
+(clipmunk-defcfun ("cpRotaryLimitJointGetMin" #.(chipmunk-lispify "cpRotaryLimitJointGetMin" 'function)) :double
   (constraint :pointer))
 
-(cffi:defcfun ("cpRotaryLimitJointSetMin" #.(chipmunk-lispify "cpRotaryLimitJointSetMin" 'function)) :void
+(clipmunk-defcfun ("cpRotaryLimitJointSetMin" #.(chipmunk-lispify "cpRotaryLimitJointSetMin" 'function)) :void
   (constraint :pointer)
   (value :double))
 
-(cffi:defcfun ("cpRotaryLimitJointGetMax" #.(chipmunk-lispify "cpRotaryLimitJointGetMax" 'function)) :double
+(clipmunk-defcfun ("cpRotaryLimitJointGetMax" #.(chipmunk-lispify "cpRotaryLimitJointGetMax" 'function)) :double
   (constraint :pointer))
 
-(cffi:defcfun ("cpRotaryLimitJointSetMax" #.(chipmunk-lispify "cpRotaryLimitJointSetMax" 'function)) :void
+(clipmunk-defcfun ("cpRotaryLimitJointSetMax" #.(chipmunk-lispify "cpRotaryLimitJointSetMax" 'function)) :void
   (constraint :pointer)
   (value :double))
 
-(cffi:defcfun ("cpSimpleMotorGetClass" #.(chipmunk-lispify "cpSimpleMotorGetClass" 'function)) :pointer)
+(clipmunk-defcfun ("cpSimpleMotorGetClass" #.(chipmunk-lispify "cpSimpleMotorGetClass" 'function)) :pointer)
 
-(cffi:defcstruct #.(chipmunk-lispify "cpSimpleMotor" 'classname)
+(clipmunk-defcstruct #.(chipmunk-lispify "cpSimpleMotor" 'classname)
 	(#.(chipmunk-lispify "constraint" 'slotname) #.(chipmunk-lispify "cpConstraint" 'classname))
 	(#.(chipmunk-lispify "rate" 'slotname) :double)
 	(#.(chipmunk-lispify "iSum" 'slotname) :double)
 	(#.(chipmunk-lispify "jAcc" 'slotname) :double)
 	(#.(chipmunk-lispify "jMax" 'slotname) :double))
 
-(cffi:defcfun ("cpSimpleMotorAlloc" #.(chipmunk-lispify "cpSimpleMotorAlloc" 'function)) :pointer)
+(clipmunk-defcfun ("cpSimpleMotorAlloc" #.(chipmunk-lispify "cpSimpleMotorAlloc" 'function)) :pointer)
 
-(cffi:defcfun ("cpSimpleMotorInit" #.(chipmunk-lispify "cpSimpleMotorInit" 'function)) :pointer
+(clipmunk-defcfun ("cpSimpleMotorInit" #.(chipmunk-lispify "cpSimpleMotorInit" 'function)) :pointer
   (joint :pointer)
   (a :pointer)
   (b :pointer)
   (rate :double))
 
-(cffi:defcfun ("cpSimpleMotorNew" #.(chipmunk-lispify "cpSimpleMotorNew" 'function)) :pointer
+(clipmunk-defcfun ("cpSimpleMotorNew" #.(chipmunk-lispify "cpSimpleMotorNew" 'function)) :pointer
   (a :pointer)
   (b :pointer)
   (rate :double))
 
-(cffi:defcfun ("cpSimpleMotorGetRate" #.(chipmunk-lispify "cpSimpleMotorGetRate" 'function)) :double
+(clipmunk-defcfun ("cpSimpleMotorGetRate" #.(chipmunk-lispify "cpSimpleMotorGetRate" 'function)) :double
   (constraint :pointer))
 
-(cffi:defcfun ("cpSimpleMotorSetRate" #.(chipmunk-lispify "cpSimpleMotorSetRate" 'function)) :void
+(clipmunk-defcfun ("cpSimpleMotorSetRate" #.(chipmunk-lispify "cpSimpleMotorSetRate" 'function)) :void
   (constraint :pointer)
   (value :double))
 
-(cffi:defcfun ("cpSlideJointGetClass" #.(chipmunk-lispify "cpSlideJointGetClass" 'function)) :pointer)
+(clipmunk-defcfun ("cpSlideJointGetClass" #.(chipmunk-lispify "cpSlideJointGetClass" 'function)) :pointer)
 
-(cffi:defcstruct #.(chipmunk-lispify "cpSlideJoint" 'classname)
+(clipmunk-defcstruct #.(chipmunk-lispify "cpSlideJoint" 'classname)
 	(#.(chipmunk-lispify "constraint" 'slotname) #.(chipmunk-lispify "cpConstraint" 'classname))
 	(anchr1-x :double) (anchr1-y :double)
 	(anchr2-x :double) (anchr2-y :double)
@@ -1210,9 +1225,9 @@
 	(#.(chipmunk-lispify "jnMax" 'slotname) :double)
 	(#.(chipmunk-lispify "bias" 'slotname) :double))
 
-(cffi:defcfun ("cpSlideJointAlloc" #.(chipmunk-lispify "cpSlideJointAlloc" 'function)) :pointer)
+(clipmunk-defcfun ("cpSlideJointAlloc" #.(chipmunk-lispify "cpSlideJointAlloc" 'function)) :pointer)
 
-(cffi:defcfun ("cpSlideJointInit" #.(chipmunk-lispify "cpSlideJointInit" 'function)) :pointer
+(clipmunk-defcfun ("cpSlideJointInit" #.(chipmunk-lispify "cpSlideJointInit" 'function)) :pointer
   (joint :pointer)
   (a :pointer)
   (b :pointer)
@@ -1221,7 +1236,7 @@
   (min :double)
   (max :double))
 
-(cffi:defcfun ("cpSlideJointNew" #.(chipmunk-lispify "cpSlideJointNew" 'function)) :pointer
+(clipmunk-defcfun ("cpSlideJointNew" #.(chipmunk-lispify "cpSlideJointNew" 'function)) :pointer
   (a :pointer)
   (b :pointer)
   (anchr1-x :double) (anchr1-y :double)
@@ -1229,35 +1244,35 @@
   (min :double)
   (max :double))
 
-(cffi:defcfun ("cpSlideJointGetAnchr1" #.(chipmunk-lispify "cpSlideJointGetAnchr1" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
+(clipmunk-defcfun ("cpSlideJointGetAnchr1" #.(chipmunk-lispify "cpSlideJointGetAnchr1" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
   (constraint :pointer))
 
-(cffi:defcfun ("cpSlideJointSetAnchr1" #.(chipmunk-lispify "cpSlideJointSetAnchr1" 'function)) :void
+(clipmunk-defcfun ("cpSlideJointSetAnchr1" #.(chipmunk-lispify "cpSlideJointSetAnchr1" 'function)) :void
   (constraint :pointer)
   (value-x :double) (value-y :double))
 
-(cffi:defcfun ("cpSlideJointGetAnchr2" #.(chipmunk-lispify "cpSlideJointGetAnchr2" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
+(clipmunk-defcfun ("cpSlideJointGetAnchr2" #.(chipmunk-lispify "cpSlideJointGetAnchr2" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
   (constraint :pointer))
 
-(cffi:defcfun ("cpSlideJointSetAnchr2" #.(chipmunk-lispify "cpSlideJointSetAnchr2" 'function)) :void
+(clipmunk-defcfun ("cpSlideJointSetAnchr2" #.(chipmunk-lispify "cpSlideJointSetAnchr2" 'function)) :void
   (constraint :pointer)
   (value-x :double) (value-y :double))
 
-(cffi:defcfun ("cpSlideJointGetMin" #.(chipmunk-lispify "cpSlideJointGetMin" 'function)) :double
+(clipmunk-defcfun ("cpSlideJointGetMin" #.(chipmunk-lispify "cpSlideJointGetMin" 'function)) :double
   (constraint :pointer))
 
-(cffi:defcfun ("cpSlideJointSetMin" #.(chipmunk-lispify "cpSlideJointSetMin" 'function)) :void
+(clipmunk-defcfun ("cpSlideJointSetMin" #.(chipmunk-lispify "cpSlideJointSetMin" 'function)) :void
   (constraint :pointer)
   (value :double))
 
-(cffi:defcfun ("cpSlideJointGetMax" #.(chipmunk-lispify "cpSlideJointGetMax" 'function)) :double
+(clipmunk-defcfun ("cpSlideJointGetMax" #.(chipmunk-lispify "cpSlideJointGetMax" 'function)) :double
   (constraint :pointer))
 
-(cffi:defcfun ("cpSlideJointSetMax" #.(chipmunk-lispify "cpSlideJointSetMax" 'function)) :void
+(clipmunk-defcfun ("cpSlideJointSetMax" #.(chipmunk-lispify "cpSlideJointSetMax" 'function)) :void
   (constraint :pointer)
   (value :double))
 
-(cffi:defcstruct #.(chipmunk-lispify "cpSpace" 'classname)
+(clipmunk-defcstruct #.(chipmunk-lispify "cpSpace" 'classname)
 	(#.(chipmunk-lispify "iterations" 'slotname) :int)
 	(gravity-x :double) (gravity-y :double)
 	(#.(chipmunk-lispify "damping" 'slotname) :double)
@@ -1289,99 +1304,99 @@
 	(#.(chipmunk-lispify "postStepCallbacks_private" 'slotname) :pointer)
 	(#.(chipmunk-lispify "_staticBody_private" 'slotname) #.(chipmunk-lispify "cpBody" 'classname)))
 
-(cffi:defcfun ("cpSpaceAlloc" #.(chipmunk-lispify "cpSpaceAlloc" 'function)) :pointer)
+(clipmunk-defcfun ("cpSpaceAlloc" #.(chipmunk-lispify "cpSpaceAlloc" 'function)) :pointer)
 
-(cffi:defcfun ("cpSpaceInit" #.(chipmunk-lispify "cpSpaceInit" 'function)) :pointer
+(clipmunk-defcfun ("cpSpaceInit" #.(chipmunk-lispify "cpSpaceInit" 'function)) :pointer
   (space :pointer))
 
-(cffi:defcfun ("cpSpaceNew" #.(chipmunk-lispify "cpSpaceNew" 'function)) :pointer)
+(clipmunk-defcfun ("cpSpaceNew" #.(chipmunk-lispify "cpSpaceNew" 'function)) :pointer)
 
-(cffi:defcfun ("cpSpaceDestroy" #.(chipmunk-lispify "cpSpaceDestroy" 'function)) :void
+(clipmunk-defcfun ("cpSpaceDestroy" #.(chipmunk-lispify "cpSpaceDestroy" 'function)) :void
   (space :pointer))
 
-(cffi:defcfun ("cpSpaceFree" #.(chipmunk-lispify "cpSpaceFree" 'function)) :void
+(clipmunk-defcfun ("cpSpaceFree" #.(chipmunk-lispify "cpSpaceFree" 'function)) :void
   (space :pointer))
 
-(cffi:defcfun ("cpSpaceGetIterations" #.(chipmunk-lispify "cpSpaceGetIterations" 'function)) :int
+(clipmunk-defcfun ("cpSpaceGetIterations" #.(chipmunk-lispify "cpSpaceGetIterations" 'function)) :int
   (space :pointer))
 
-(cffi:defcfun ("cpSpaceSetIterations" #.(chipmunk-lispify "cpSpaceSetIterations" 'function)) :void
+(clipmunk-defcfun ("cpSpaceSetIterations" #.(chipmunk-lispify "cpSpaceSetIterations" 'function)) :void
   (space :pointer)
   (value :int))
 
-(cffi:defcfun ("cpSpaceGetGravity" #.(chipmunk-lispify "cpSpaceGetGravity" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
+(clipmunk-defcfun ("cpSpaceGetGravity" #.(chipmunk-lispify "cpSpaceGetGravity" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
   (space :pointer))
 
-(cffi:defcfun ("cpSpaceSetGravity" #.(chipmunk-lispify "cpSpaceSetGravity" 'function)) :void
+(clipmunk-defcfun ("cpSpaceSetGravity" #.(chipmunk-lispify "cpSpaceSetGravity" 'function)) :void
   (space :pointer)
   (value-x :double) (value-y :double))
 
-(cffi:defcfun ("cpSpaceGetDamping" #.(chipmunk-lispify "cpSpaceGetDamping" 'function)) :double
+(clipmunk-defcfun ("cpSpaceGetDamping" #.(chipmunk-lispify "cpSpaceGetDamping" 'function)) :double
   (space :pointer))
 
-(cffi:defcfun ("cpSpaceSetDamping" #.(chipmunk-lispify "cpSpaceSetDamping" 'function)) :void
+(clipmunk-defcfun ("cpSpaceSetDamping" #.(chipmunk-lispify "cpSpaceSetDamping" 'function)) :void
   (space :pointer)
   (value :double))
 
-(cffi:defcfun ("cpSpaceGetIdleSpeedThreshold" #.(chipmunk-lispify "cpSpaceGetIdleSpeedThreshold" 'function)) :double
+(clipmunk-defcfun ("cpSpaceGetIdleSpeedThreshold" #.(chipmunk-lispify "cpSpaceGetIdleSpeedThreshold" 'function)) :double
   (space :pointer))
 
-(cffi:defcfun ("cpSpaceSetIdleSpeedThreshold" #.(chipmunk-lispify "cpSpaceSetIdleSpeedThreshold" 'function)) :void
+(clipmunk-defcfun ("cpSpaceSetIdleSpeedThreshold" #.(chipmunk-lispify "cpSpaceSetIdleSpeedThreshold" 'function)) :void
   (space :pointer)
   (value :double))
 
-(cffi:defcfun ("cpSpaceGetSleepTimeThreshold" #.(chipmunk-lispify "cpSpaceGetSleepTimeThreshold" 'function)) :double
+(clipmunk-defcfun ("cpSpaceGetSleepTimeThreshold" #.(chipmunk-lispify "cpSpaceGetSleepTimeThreshold" 'function)) :double
   (space :pointer))
 
-(cffi:defcfun ("cpSpaceSetSleepTimeThreshold" #.(chipmunk-lispify "cpSpaceSetSleepTimeThreshold" 'function)) :void
+(clipmunk-defcfun ("cpSpaceSetSleepTimeThreshold" #.(chipmunk-lispify "cpSpaceSetSleepTimeThreshold" 'function)) :void
   (space :pointer)
   (value :double))
 
-(cffi:defcfun ("cpSpaceGetCollisionSlop" #.(chipmunk-lispify "cpSpaceGetCollisionSlop" 'function)) :double
+(clipmunk-defcfun ("cpSpaceGetCollisionSlop" #.(chipmunk-lispify "cpSpaceGetCollisionSlop" 'function)) :double
   (space :pointer))
 
-(cffi:defcfun ("cpSpaceSetCollisionSlop" #.(chipmunk-lispify "cpSpaceSetCollisionSlop" 'function)) :void
+(clipmunk-defcfun ("cpSpaceSetCollisionSlop" #.(chipmunk-lispify "cpSpaceSetCollisionSlop" 'function)) :void
   (space :pointer)
   (value :double))
 
-(cffi:defcfun ("cpSpaceGetCollisionBias" #.(chipmunk-lispify "cpSpaceGetCollisionBias" 'function)) :double
+(clipmunk-defcfun ("cpSpaceGetCollisionBias" #.(chipmunk-lispify "cpSpaceGetCollisionBias" 'function)) :double
   (space :pointer))
 
-(cffi:defcfun ("cpSpaceSetCollisionBias" #.(chipmunk-lispify "cpSpaceSetCollisionBias" 'function)) :void
+(clipmunk-defcfun ("cpSpaceSetCollisionBias" #.(chipmunk-lispify "cpSpaceSetCollisionBias" 'function)) :void
   (space :pointer)
   (value :double))
 
-(cffi:defcfun ("cpSpaceGetCollisionPersistence" #.(chipmunk-lispify "cpSpaceGetCollisionPersistence" 'function)) :unsigned-int
+(clipmunk-defcfun ("cpSpaceGetCollisionPersistence" #.(chipmunk-lispify "cpSpaceGetCollisionPersistence" 'function)) :unsigned-int
   (space :pointer))
 
-(cffi:defcfun ("cpSpaceSetCollisionPersistence" #.(chipmunk-lispify "cpSpaceSetCollisionPersistence" 'function)) :void
+(clipmunk-defcfun ("cpSpaceSetCollisionPersistence" #.(chipmunk-lispify "cpSpaceSetCollisionPersistence" 'function)) :void
   (space :pointer)
   (value :unsigned-int))
 
-(cffi:defcfun ("cpSpaceGetEnableContactGraph" #.(chipmunk-lispify "cpSpaceGetEnableContactGraph" 'function)) :int
+(clipmunk-defcfun ("cpSpaceGetEnableContactGraph" #.(chipmunk-lispify "cpSpaceGetEnableContactGraph" 'function)) :int
   (space :pointer))
 
-(cffi:defcfun ("cpSpaceSetEnableContactGraph" #.(chipmunk-lispify "cpSpaceSetEnableContactGraph" 'function)) :void
+(clipmunk-defcfun ("cpSpaceSetEnableContactGraph" #.(chipmunk-lispify "cpSpaceSetEnableContactGraph" 'function)) :void
   (space :pointer)
   (value :int))
 
-(cffi:defcfun ("cpSpaceGetUserData" #.(chipmunk-lispify "cpSpaceGetUserData" 'function)) :pointer
+(clipmunk-defcfun ("cpSpaceGetUserData" #.(chipmunk-lispify "cpSpaceGetUserData" 'function)) :pointer
   (space :pointer))
 
-(cffi:defcfun ("cpSpaceSetUserData" #.(chipmunk-lispify "cpSpaceSetUserData" 'function)) :void
+(clipmunk-defcfun ("cpSpaceSetUserData" #.(chipmunk-lispify "cpSpaceSetUserData" 'function)) :void
   (space :pointer)
   (value :pointer))
 
-(cffi:defcfun ("cpSpaceGetStaticBody" #.(chipmunk-lispify "cpSpaceGetStaticBody" 'function)) :pointer
+(clipmunk-defcfun ("cpSpaceGetStaticBody" #.(chipmunk-lispify "cpSpaceGetStaticBody" 'function)) :pointer
   (space :pointer))
 
-(cffi:defcfun ("cpSpaceGetCurrentTimeStep" #.(chipmunk-lispify "cpSpaceGetCurrentTimeStep" 'function)) :double
+(clipmunk-defcfun ("cpSpaceGetCurrentTimeStep" #.(chipmunk-lispify "cpSpaceGetCurrentTimeStep" 'function)) :double
   (space :pointer))
 
-(cffi:defcfun ("cpSpaceIsLocked" #.(chipmunk-lispify "cpSpaceIsLocked" 'function)) :int
+(clipmunk-defcfun ("cpSpaceIsLocked" #.(chipmunk-lispify "cpSpaceIsLocked" 'function)) :int
   (space :pointer))
 
-(cffi:defcfun ("cpSpaceSetDefaultCollisionHandler" #.(chipmunk-lispify "cpSpaceSetDefaultCollisionHandler" 'function)) :void
+(clipmunk-defcfun ("cpSpaceSetDefaultCollisionHandler" #.(chipmunk-lispify "cpSpaceSetDefaultCollisionHandler" 'function)) :void
   (space :pointer)
   (begin :pointer)
   (preSolve :pointer)
@@ -1389,7 +1404,7 @@
   (separate :pointer)
   (data :pointer))
 
-(cffi:defcfun ("cpSpaceAddCollisionHandler" #.(chipmunk-lispify "cpSpaceAddCollisionHandler" 'function)) :void
+(clipmunk-defcfun ("cpSpaceAddCollisionHandler" #.(chipmunk-lispify "cpSpaceAddCollisionHandler" 'function)) :void
   (space :pointer)
   (a :pointer)
   (b :pointer)
@@ -1399,62 +1414,62 @@
   (separate :pointer)
   (data :pointer))
 
-(cffi:defcfun ("cpSpaceRemoveCollisionHandler" #.(chipmunk-lispify "cpSpaceRemoveCollisionHandler" 'function)) :void
+(clipmunk-defcfun ("cpSpaceRemoveCollisionHandler" #.(chipmunk-lispify "cpSpaceRemoveCollisionHandler" 'function)) :void
   (space :pointer)
   (a :pointer)
   (b :pointer))
 
-(cffi:defcfun ("cpSpaceAddShape" #.(chipmunk-lispify "cpSpaceAddShape" 'function)) :pointer
+(clipmunk-defcfun ("cpSpaceAddShape" #.(chipmunk-lispify "cpSpaceAddShape" 'function)) :pointer
   (space :pointer)
   (shape :pointer))
 
-(cffi:defcfun ("cpSpaceAddStaticShape" #.(chipmunk-lispify "cpSpaceAddStaticShape" 'function)) :pointer
+(clipmunk-defcfun ("cpSpaceAddStaticShape" #.(chipmunk-lispify "cpSpaceAddStaticShape" 'function)) :pointer
   (space :pointer)
   (shape :pointer))
 
-(cffi:defcfun ("cpSpaceAddBody" #.(chipmunk-lispify "cpSpaceAddBody" 'function)) :pointer
+(clipmunk-defcfun ("cpSpaceAddBody" #.(chipmunk-lispify "cpSpaceAddBody" 'function)) :pointer
   (space :pointer)
   (body :pointer))
 
-(cffi:defcfun ("cpSpaceAddConstraint" #.(chipmunk-lispify "cpSpaceAddConstraint" 'function)) :pointer
+(clipmunk-defcfun ("cpSpaceAddConstraint" #.(chipmunk-lispify "cpSpaceAddConstraint" 'function)) :pointer
   (space :pointer)
   (constraint :pointer))
 
-(cffi:defcfun ("cpSpaceRemoveShape" #.(chipmunk-lispify "cpSpaceRemoveShape" 'function)) :void
+(clipmunk-defcfun ("cpSpaceRemoveShape" #.(chipmunk-lispify "cpSpaceRemoveShape" 'function)) :void
   (space :pointer)
   (shape :pointer))
 
-(cffi:defcfun ("cpSpaceRemoveStaticShape" #.(chipmunk-lispify "cpSpaceRemoveStaticShape" 'function)) :void
+(clipmunk-defcfun ("cpSpaceRemoveStaticShape" #.(chipmunk-lispify "cpSpaceRemoveStaticShape" 'function)) :void
   (space :pointer)
   (shape :pointer))
 
-(cffi:defcfun ("cpSpaceRemoveBody" #.(chipmunk-lispify "cpSpaceRemoveBody" 'function)) :void
+(clipmunk-defcfun ("cpSpaceRemoveBody" #.(chipmunk-lispify "cpSpaceRemoveBody" 'function)) :void
   (space :pointer)
   (body :pointer))
 
-(cffi:defcfun ("cpSpaceRemoveConstraint" #.(chipmunk-lispify "cpSpaceRemoveConstraint" 'function)) :void
+(clipmunk-defcfun ("cpSpaceRemoveConstraint" #.(chipmunk-lispify "cpSpaceRemoveConstraint" 'function)) :void
   (space :pointer)
   (constraint :pointer))
 
-(cffi:defcfun ("cpSpaceContainsShape" #.(chipmunk-lispify "cpSpaceContainsShape" 'function)) :int
+(clipmunk-defcfun ("cpSpaceContainsShape" #.(chipmunk-lispify "cpSpaceContainsShape" 'function)) :int
   (space :pointer)
   (shape :pointer))
 
-(cffi:defcfun ("cpSpaceContainsBody" #.(chipmunk-lispify "cpSpaceContainsBody" 'function)) :int
+(clipmunk-defcfun ("cpSpaceContainsBody" #.(chipmunk-lispify "cpSpaceContainsBody" 'function)) :int
   (space :pointer)
   (body :pointer))
 
-(cffi:defcfun ("cpSpaceContainsConstraint" #.(chipmunk-lispify "cpSpaceContainsConstraint" 'function)) :int
+(clipmunk-defcfun ("cpSpaceContainsConstraint" #.(chipmunk-lispify "cpSpaceContainsConstraint" 'function)) :int
   (space :pointer)
   (constraint :pointer))
 
-(cffi:defcfun ("cpSpaceAddPostStepCallback" #.(chipmunk-lispify "cpSpaceAddPostStepCallback" 'function)) :void
+(clipmunk-defcfun ("cpSpaceAddPostStepCallback" #.(chipmunk-lispify "cpSpaceAddPostStepCallback" 'function)) :void
   (space :pointer)
   (func :pointer)
   (key :pointer)
   (data :pointer))
 
-(cffi:defcfun ("cpSpacePointQuery" #.(chipmunk-lispify "cpSpacePointQuery" 'function)) :void
+(clipmunk-defcfun ("cpSpacePointQuery" #.(chipmunk-lispify "cpSpacePointQuery" 'function)) :void
   (space :pointer)
   (point-x :double) (point-y :double)
   (layers :unsigned-int)
@@ -1462,13 +1477,13 @@
   (func :pointer)
   (data :pointer))
 
-(cffi:defcfun ("cpSpacePointQueryFirst" #.(chipmunk-lispify "cpSpacePointQueryFirst" 'function)) :pointer
+(clipmunk-defcfun ("cpSpacePointQueryFirst" #.(chipmunk-lispify "cpSpacePointQueryFirst" 'function)) :pointer
   (space :pointer)
   (point-x :double) (point-y :double)
   (layers :unsigned-int)
   (group :pointer))
 
-(cffi:defcfun ("cpSpaceNearestPointQuery" #.(chipmunk-lispify "cpSpaceNearestPointQuery" 'function)) :void
+(clipmunk-defcfun ("cpSpaceNearestPointQuery" #.(chipmunk-lispify "cpSpaceNearestPointQuery" 'function)) :void
   (space :pointer)
   (point-x :double) (point-y :double)
   (maxDistance :double)
@@ -1477,7 +1492,7 @@
   (func :pointer)
   (data :pointer))
 
-(cffi:defcfun ("cpSpaceNearestPointQueryNearest" #.(chipmunk-lispify "cpSpaceNearestPointQueryNearest" 'function)) :pointer
+(clipmunk-defcfun ("cpSpaceNearestPointQueryNearest" #.(chipmunk-lispify "cpSpaceNearestPointQueryNearest" 'function)) :pointer
   (space :pointer)
   (point-x :double) (point-y :double)
   (maxDistance :double)
@@ -1485,7 +1500,7 @@
   (group :pointer)
   (out :pointer))
 
-(cffi:defcfun ("cpSpaceSegmentQuery" #.(chipmunk-lispify "cpSpaceSegmentQuery" 'function)) :void
+(clipmunk-defcfun ("cpSpaceSegmentQuery" #.(chipmunk-lispify "cpSpaceSegmentQuery" 'function)) :void
   (space :pointer)
   (start-x :double) (start-y :double)
   (end-x :double) (end-y :double)
@@ -1494,7 +1509,7 @@
   (func :pointer)
   (data :pointer))
 
-(cffi:defcfun ("cpSpaceSegmentQueryFirst" #.(chipmunk-lispify "cpSpaceSegmentQueryFirst" 'function)) :pointer
+(clipmunk-defcfun ("cpSpaceSegmentQueryFirst" #.(chipmunk-lispify "cpSpaceSegmentQueryFirst" 'function)) :pointer
   (space :pointer)
   (start-x :double) (start-y :double)
   (end-x :double) (end-y :double)
@@ -1502,7 +1517,7 @@
   (group :pointer)
   (out :pointer))
 
-(cffi:defcfun ("cpSpaceBBQuery" #.(chipmunk-lispify "cpSpaceBBQuery" 'function)) :void
+(clipmunk-defcfun ("cpSpaceBBQuery" #.(chipmunk-lispify "cpSpaceBBQuery" 'function)) :void
   (space :pointer)
   (bb #.(chipmunk-lispify "cpBB" 'classname))
   (layers :unsigned-int)
@@ -1510,48 +1525,48 @@
   (func :pointer)
   (data :pointer))
 
-(cffi:defcfun ("cpSpaceShapeQuery" #.(chipmunk-lispify "cpSpaceShapeQuery" 'function)) :int
+(clipmunk-defcfun ("cpSpaceShapeQuery" #.(chipmunk-lispify "cpSpaceShapeQuery" 'function)) :int
   (space :pointer)
   (shape :pointer)
   (func :pointer)
   (data :pointer))
 
-(cffi:defcfun ("cpSpaceActivateShapesTouchingShape" #.(chipmunk-lispify "cpSpaceActivateShapesTouchingShape" 'function)) :void
+(clipmunk-defcfun ("cpSpaceActivateShapesTouchingShape" #.(chipmunk-lispify "cpSpaceActivateShapesTouchingShape" 'function)) :void
   (space :pointer)
   (shape :pointer))
 
-(cffi:defcfun ("cpSpaceEachBody" #.(chipmunk-lispify "cpSpaceEachBody" 'function)) :void
+(clipmunk-defcfun ("cpSpaceEachBody" #.(chipmunk-lispify "cpSpaceEachBody" 'function)) :void
   (space :pointer)
   (func :pointer)
   (data :pointer))
 
-(cffi:defcfun ("cpSpaceEachShape" #.(chipmunk-lispify "cpSpaceEachShape" 'function)) :void
+(clipmunk-defcfun ("cpSpaceEachShape" #.(chipmunk-lispify "cpSpaceEachShape" 'function)) :void
   (space :pointer)
   (func :pointer)
   (data :pointer))
 
-(cffi:defcfun ("cpSpaceEachConstraint" #.(chipmunk-lispify "cpSpaceEachConstraint" 'function)) :void
+(clipmunk-defcfun ("cpSpaceEachConstraint" #.(chipmunk-lispify "cpSpaceEachConstraint" 'function)) :void
   (space :pointer)
   (func :pointer)
   (data :pointer))
 
-(cffi:defcfun ("cpSpaceReindexStatic" #.(chipmunk-lispify "cpSpaceReindexStatic" 'function)) :void
+(clipmunk-defcfun ("cpSpaceReindexStatic" #.(chipmunk-lispify "cpSpaceReindexStatic" 'function)) :void
   (space :pointer))
 
-(cffi:defcfun ("cpSpaceReindexShape" #.(chipmunk-lispify "cpSpaceReindexShape" 'function)) :void
+(clipmunk-defcfun ("cpSpaceReindexShape" #.(chipmunk-lispify "cpSpaceReindexShape" 'function)) :void
   (space :pointer)
   (shape :pointer))
 
-(cffi:defcfun ("cpSpaceReindexShapesForBody" #.(chipmunk-lispify "cpSpaceReindexShapesForBody" 'function)) :void
+(clipmunk-defcfun ("cpSpaceReindexShapesForBody" #.(chipmunk-lispify "cpSpaceReindexShapesForBody" 'function)) :void
   (space :pointer)
   (body :pointer))
 
-(cffi:defcfun ("cpSpaceUseSpatialHash" #.(chipmunk-lispify "cpSpaceUseSpatialHash" 'function)) :void
+(clipmunk-defcfun ("cpSpaceUseSpatialHash" #.(chipmunk-lispify "cpSpaceUseSpatialHash" 'function)) :void
   (space :pointer)
   (dim :double)
   (count :int))
 
-(cffi:defcfun ("cpSpaceStep" #.(chipmunk-lispify "cpSpaceStep" 'function)) :void
+(clipmunk-defcfun ("cpSpaceStep" #.(chipmunk-lispify "cpSpaceStep" 'function)) :void
   (space :pointer)
   (dt :double))
 

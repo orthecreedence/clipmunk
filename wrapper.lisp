@@ -1,7 +1,7 @@
 (in-package :clipmunk)
 
 (defmacro defanonenum (&body enums)
-   "Converts anonymous enums to defconstants."
+  "Converts anonymous enums to defconstants."
   `(progn ,@(loop for value in enums
                         for index = 0 then (1+ index)
                         when (listp value) do (setf index (second value)
@@ -40,3 +40,22 @@
                  (t ""))))
       (intern (concatenate 'string fix (nreverse (helper (concatenate 'list (strip-prefix "cp" name)) nil nil)) fix)
         package))))
+
+(defun convert-sym (sym)
+  (let* ((str (string-upcase (write-to-string sym)))
+         (search (search ":" str :from-end t)))
+    (cond ((null search)
+           (intern str))
+          ((zerop search)
+           sym)
+          (search
+           (intern (subseq str (1+ search))))
+          (t
+           (intern str)))))
+
+(defun get-cffi-type (val)
+  (if (keywordp val)
+       val
+       val))
+       ;(read-from-string (format nil "'~s" val))))
+

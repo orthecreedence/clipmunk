@@ -6,6 +6,10 @@
   (:use :cl :cffi :clipmunk)
   (:nicknames :cp-a))
 
+(defpackage #:clipmunk.ffi
+  (:use :cl :cffi)
+  (:nicknames :cp-f))
+
 (in-package :clipmunk)
 
 (define-foreign-library chipmunk

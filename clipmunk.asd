@@ -6,4 +6,5 @@
    (:file "bindings" :depends-on ("chipmunk" "wrapper"))
    (:file "extra-bindings" :depends-on ("chipmunk" "wrapper"))
    (:file "exports" :depends-on ("chipmunk" "wrapper" "bindings" "extra-bindings"))
-   (:file "accessors" :depends-on ("bindings" "exports"))))
+   (:file "accessors" :depends-on ("bindings" "exports"))
+   (:file "ffi" :depends-on ("chipmunk" "wrapper"))))
