@@ -96,6 +96,12 @@ cat <<-EOFMAC > ffi.lisp
        (export ,(read-from-string (format nil "'~s" fn-get-name)) :clipmunk.ffi)
        (export ,(read-from-string (format nil "'~s" fn-set-name)) :clipmunk.ffi))))
 
+;; need to add this manually since it's not in bindings.lisp (no public fn)
+(defparameter *body-is-sleeping* (cffi:mem-aref (cffi:foreign-symbol-pointer "_cpBodyIsSleeping") :pointer))
+(defun body-is-sleeping (body)
+  (cffi:foreign-funcall-pointer *body-is-sleeping* () :pointer body :int))
+(export 'body-is-sleeping :clipmunk.ffi)
+
 EOFMAC
 FFI=/usr/local/include/chipmunk/chipmunk_ffi.h
 if [ -f $FFI ]; then
