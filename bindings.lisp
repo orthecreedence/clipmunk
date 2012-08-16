@@ -318,6 +318,11 @@
   (f-x :double) (f-y :double)
   (r-x :double) (r-y :double))
 
+(clipmunk-defcfun ("cpBodyApplyImpulse" #.(chipmunk-lispify "cpBodyApplyImpulse" 'function)) :void
+  (body :pointer)
+  (j-x :double) (j-y :double)
+  (r-x :double) (r-y :double))
+
 (clipmunk-defcfun ("cpBodyGetVelAtWorldPoint" #.(chipmunk-lispify "cpBodyGetVelAtWorldPoint" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
   (body :pointer)
   (point-x :double) (point-y :double))

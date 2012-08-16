@@ -54,7 +54,6 @@
 %ignore "cpBodySet##name";
 %ignore "cpBodyLocal2World";
 %ignore "cpBodyWorld2Local";
-%ignore "cpBodyApplyImpulse";
 %ignore "cpBodyKineticEnergy";
 %ignore "cpPolyShapeValueOnAxis";
 %ignore "cpPolyShapeContainsVert";

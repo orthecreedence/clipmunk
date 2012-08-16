@@ -85,6 +85,7 @@
 (export (chipmunk-lispify "cpBodyUpdatePosition" 'function))
 (export (chipmunk-lispify "cpBodyResetForces" 'function))
 (export (chipmunk-lispify "cpBodyApplyForce" 'function))
+(export (chipmunk-lispify "cpBodyApplyImpulse" 'function))
 (export (chipmunk-lispify "cpBodyGetVelAtWorldPoint" 'function))
 (export (chipmunk-lispify "cpBodyGetVelAtLocalPoint" 'function))
 (export (chipmunk-lispify "cpBodyEachShape" 'function))
