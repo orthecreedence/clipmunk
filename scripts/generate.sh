@@ -91,16 +91,12 @@ cat <<-EOFMAC > ffi.lisp
                      (cffi:mem-aref (cffi:foreign-symbol-pointer ,(format nil "_~a" fn-set-str)) :pointer))
        (defun ,fn-get-name ,(list obj-class)
          (cffi:foreign-funcall-pointer ,varname-get () :pointer ,obj-class ,(clipmunk.ffi::get-class-slot-type obj-class prop-name)))
-       (defun ,fn-set-name ,(list obj-class)
-         (cffi:foreign-funcall-pointer ,varname-set () :pointer ,obj-class ,(clipmunk.ffi::get-class-slot-type obj-class prop-name)))
+       ;; setters more or less broken because of name mismatches in class fields
+       ;; and property names
+       ;(defun ,fn-set-name ,(list obj-class 'value)
+       ;  (cffi:foreign-funcall-pointer ,varname-set () :pointer ,obj-class ,(clipmunk.ffi::get-class-slot-type obj-class prop-name) value))
        (export ,(read-from-string (format nil "'~s" fn-get-name)) :clipmunk.ffi)
        (export ,(read-from-string (format nil "'~s" fn-set-name)) :clipmunk.ffi))))
-
-;; need to add this manually since it's not in bindings.lisp (no public fn)
-(defparameter *body-is-sleeping* (cffi:mem-aref (cffi:foreign-symbol-pointer "_cpBodyIsSleeping") :pointer))
-(defun body-is-sleeping (body)
-  (cffi:foreign-funcall-pointer *body-is-sleeping* () :pointer body :int))
-(export 'body-is-sleeping :clipmunk.ffi)
 
 EOFMAC
 FFI=/usr/local/include/chipmunk/chipmunk_ffi.h
@@ -112,4 +108,23 @@ if [ -f $FFI ]; then
 		grep -e '^MAKE_PROPERTIES_REF' | \
 		sed 's|.*(\([^,]\+\),\s*\([^)]\+\)).*|(def-ffi-prop "\1" "\2")|i' >> ffi.lisp
 fi
+
+cat <<-EOFMAC >> ffi.lisp
+
+;; need to add these manually since it's not in bindings.lisp (no public fn)
+(defparameter *body-is-sleeping* (cffi:mem-aref (cffi:foreign-symbol-pointer "_cpBodyIsSleeping") :pointer))
+(defun body-is-sleeping (body)
+  (cffi:foreign-funcall-pointer *body-is-sleeping* () :pointer body :int))
+(export 'body-is-sleeping :clipmunk.ffi)
+
+(defparameter *space-set-iterations* (cffi:mem-aref (cffi:foreign-symbol-pointer "_cpSpaceSetIterations") :pointer))
+(defun space-set-iterations (space iterations)
+  (cffi:foreign-funcall-pointer *space-set-iterations*  () :pointer space :int iterations))
+(export 'space-set-iterations  :clipmunk.ffi)
+
+(defparameter *space-set-collision-slop* (cffi:mem-aref (cffi:foreign-symbol-pointer "_cpSpaceSetCollisionSlop") :pointer))
+(defun space-set-collision-slop (space slop)
+  (cffi:foreign-funcall-pointer *space-set-collision-slop*  () :pointer space :double slop))
+(export 'space-set-collision-slop :clipmunk.ffi)
+EOFMAC
 echo "Done!"
