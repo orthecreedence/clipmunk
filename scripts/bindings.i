@@ -100,6 +100,8 @@
 %ignore "cpContactsSumImpulsesWithFriction";
 %ignore "cpArbiterTotalImpulse";
 %ignore "cpArbiterTotalImpulseWithFriction";
+/*%ignore "cpSpaceAddCollisionHandler";*/
+/*%ignore "cpSpaceRemoveCollisionHandler";*/
 
 %include "/usr/local/include/chipmunk/chipmunk.h"
 %include "/usr/local/include/chipmunk/chipmunk_types.h"
@@ -129,3 +131,18 @@
 %include "/usr/local/include/chipmunk/constraints/cpSlideJoint.h"
 
 %include "/usr/local/include/chipmunk/cpSpace.h"
+
+void cpSpaceAddCollisionHandler(
+    cpSpace *space,
+    int a, int b,
+    cpCollissionBeginFunc begin,
+    cpCollissionPreSolveFunc preSolve,
+    cpCollissionPostSolveFunc postSolve,
+    cpCollissionSeparateFunc separate,
+    void *data
+);
+void cpSpaceRemoveCollisionHandler(
+    cpSpace *space,
+    int a,
+    int b
+);

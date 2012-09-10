@@ -1575,4 +1575,19 @@
   (space :pointer)
   (dt :double))
 
+(clipmunk-defcfun ("cpSpaceAddCollisionHandler" #.(chipmunk-lispify "cpSpaceAddCollisionHandler" 'function)) :void
+  (space :pointer)
+  (a :int)
+  (b :int)
+  (begin :pointer)
+  (preSolve :pointer)
+  (postSolve :pointer)
+  (separate :pointer)
+  (data :pointer))
+
+(clipmunk-defcfun ("cpSpaceRemoveCollisionHandler" #.(chipmunk-lispify "cpSpaceRemoveCollisionHandler" 'function)) :void
+  (space :pointer)
+  (a :int)
+  (b :int))
+
 
