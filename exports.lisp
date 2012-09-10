@@ -172,6 +172,7 @@
 (export (chipmunk-lispify "cpContactPointSet" 'classname))
 (export (chipmunk-lispify "cpContactPointSet_points" 'classname))
 (export (chipmunk-lispify "cpArbiterGetContactPointSet" 'function))
+(export (chipmunk-lispify "cpArbiterIsFirstContact" 'function))
 (export (chipmunk-lispify "cpArbiterGetCount" 'function))
 (export (chipmunk-lispify "cpArbiterGetDepth" 'function))
 (export (chipmunk-lispify "cpConstraintClass" 'classname))

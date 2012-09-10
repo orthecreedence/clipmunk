@@ -40,7 +40,7 @@
 %ignore "cpflerpconst";
 /*%ignore "cpArbiterGetShapes";*/
 /*%ignore "cpArbiterGetBodies";*/
-%ignore "cpArbiterIsFirstContact";
+/*%ignore "cpArbiterIsFirstContact";*/
 %ignore "cpArbiterGetNormal";
 %ignore "cpArbiterGetPoint";
 %ignore "cpBBNew";

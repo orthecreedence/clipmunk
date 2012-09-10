@@ -684,6 +684,9 @@
 (clipmunk-defcfun ("cpArbiterGetContactPointSet" #.(chipmunk-lispify "cpArbiterGetContactPointSet" 'function)) #.(chipmunk-lispify "cpContactPointSet" 'classname)
   (arb :pointer))
 
+(clipmunk-defcfun ("cpArbiterIsFirstContact" #.(chipmunk-lispify "cpArbiterIsFirstContact" 'function)) :int
+  (arb :pointer))
+
 (clipmunk-defcfun ("cpArbiterGetCount" #.(chipmunk-lispify "cpArbiterGetCount" 'function)) :int
   (arb :pointer))
 
