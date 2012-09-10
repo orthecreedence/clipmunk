@@ -38,8 +38,8 @@
 %ignore "cpfclamp";
 %ignore "cpflerp";
 %ignore "cpflerpconst";
-%ignore "cpArbiterGetShapes";
-%ignore "cpArbiterGetBodies";
+/*%ignore "cpArbiterGetShapes";*/
+/*%ignore "cpArbiterGetBodies";*/
 %ignore "cpArbiterIsFirstContact";
 %ignore "cpArbiterGetNormal";
 %ignore "cpArbiterGetPoint";
