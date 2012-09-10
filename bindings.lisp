@@ -214,8 +214,8 @@
   (space :pointer))
 
 (clipmunk-defcstruct #.(chipmunk-lispify "cpContact" 'classname)
-	(#.(chipmunk-lispify "p" 'slotname) :pointer)
-	(#.(chipmunk-lispify "n" 'slotname) :pointer)
+	(p-x :double) (p-y :double)
+	(n-x :double) (n-y :double)
 	(#.(chipmunk-lispify "dist" 'slotname) :double)
 	(#.(chipmunk-lispify "r1" 'slotname) :pointer)
 	(#.(chipmunk-lispify "r2" 'slotname) :pointer)
