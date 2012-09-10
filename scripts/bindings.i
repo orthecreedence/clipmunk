@@ -103,6 +103,7 @@
 /*%ignore "cpSpaceAddCollisionHandler";*/
 /*%ignore "cpSpaceRemoveCollisionHandler";*/
 
+%include "/usr/local/include/chipmunk/chipmunk_private.h"
 %include "/usr/local/include/chipmunk/chipmunk.h"
 %include "/usr/local/include/chipmunk/chipmunk_types.h"
 %include "/usr/local/include/chipmunk/cpVect.h"
@@ -131,6 +132,7 @@
 %include "/usr/local/include/chipmunk/constraints/cpSlideJoint.h"
 
 %include "/usr/local/include/chipmunk/cpSpace.h"
+
 
 void cpSpaceAddCollisionHandler(
     cpSpace *space,

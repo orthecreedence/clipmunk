@@ -23,7 +23,254 @@
 
 
 
-(cl:defconstant #.(chipmunk-lispify "CP_ALLOW_PRIVATE_ACCESS" 'constant) 0)
+(cl:defconstant #.(chipmunk-lispify "CP_ALLOW_PRIVATE_ACCESS" 'constant) 1)
+
+(clipmunk-defcstruct #.(chipmunk-lispify "cpArray" 'classname)
+	(#.(chipmunk-lispify "num" 'slotname) :int)
+	(#.(chipmunk-lispify "max" 'slotname) :int)
+	(#.(chipmunk-lispify "arr" 'slotname) :pointer))
+
+(clipmunk-defcfun ("cpArrayNew" #.(chipmunk-lispify "cpArrayNew" 'function)) :pointer
+  (size :int))
+
+(clipmunk-defcfun ("cpArrayFree" #.(chipmunk-lispify "cpArrayFree" 'function)) :void
+  (arr :pointer))
+
+(clipmunk-defcfun ("cpArrayPush" #.(chipmunk-lispify "cpArrayPush" 'function)) :void
+  (arr :pointer)
+  (object :pointer))
+
+(clipmunk-defcfun ("cpArrayPop" #.(chipmunk-lispify "cpArrayPop" 'function)) :pointer
+  (arr :pointer))
+
+(clipmunk-defcfun ("cpArrayDeleteObj" #.(chipmunk-lispify "cpArrayDeleteObj" 'function)) :void
+  (arr :pointer)
+  (obj :pointer))
+
+(clipmunk-defcfun ("cpArrayContains" #.(chipmunk-lispify "cpArrayContains" 'function)) :int
+  (arr :pointer)
+  (ptr :pointer))
+
+(clipmunk-defcfun ("cpArrayFreeEach" #.(chipmunk-lispify "cpArrayFreeEach" 'function)) :void
+  (arr :pointer)
+  (arg1 :pointer))
+
+(clipmunk-defcfun ("cpConstraintNext" #.(chipmunk-lispify "cpConstraintNext" 'function)) :pointer
+  (node :pointer)
+  (body :pointer))
+
+(clipmunk-defcfun ("cpArbiterNext" #.(chipmunk-lispify "cpArbiterNext" 'function)) :pointer
+  (node :pointer)
+  (body :pointer))
+
+(clipmunk-defcfun ("cpHashSetNew" #.(chipmunk-lispify "cpHashSetNew" 'function)) :pointer
+  (size :int)
+  (eqlFunc :pointer))
+
+(clipmunk-defcfun ("cpHashSetSetDefaultValue" #.(chipmunk-lispify "cpHashSetSetDefaultValue" 'function)) :void
+  (set :pointer)
+  (default_value :pointer))
+
+(clipmunk-defcfun ("cpHashSetFree" #.(chipmunk-lispify "cpHashSetFree" 'function)) :void
+  (set :pointer))
+
+(clipmunk-defcfun ("cpHashSetCount" #.(chipmunk-lispify "cpHashSetCount" 'function)) :int
+  (set :pointer))
+
+(clipmunk-defcfun ("cpHashSetInsert" #.(chipmunk-lispify "cpHashSetInsert" 'function)) :pointer
+  (set :pointer)
+  (hash :pointer)
+  (ptr :pointer)
+  (data :pointer)
+  (trans :pointer))
+
+(clipmunk-defcfun ("cpHashSetRemove" #.(chipmunk-lispify "cpHashSetRemove" 'function)) :pointer
+  (set :pointer)
+  (hash :pointer)
+  (ptr :pointer))
+
+(clipmunk-defcfun ("cpHashSetFind" #.(chipmunk-lispify "cpHashSetFind" 'function)) :pointer
+  (set :pointer)
+  (hash :pointer)
+  (ptr :pointer))
+
+(clipmunk-defcfun ("cpHashSetEach" #.(chipmunk-lispify "cpHashSetEach" 'function)) :void
+  (set :pointer)
+  (func :pointer)
+  (data :pointer))
+
+(clipmunk-defcfun ("cpHashSetFilter" #.(chipmunk-lispify "cpHashSetFilter" 'function)) :void
+  (set :pointer)
+  (func :pointer)
+  (data :pointer))
+
+(clipmunk-defcfun ("cpBodyAddShape" #.(chipmunk-lispify "cpBodyAddShape" 'function)) :void
+  (body :pointer)
+  (shape :pointer))
+
+(clipmunk-defcfun ("cpBodyRemoveShape" #.(chipmunk-lispify "cpBodyRemoveShape" 'function)) :void
+  (body :pointer)
+  (shape :pointer))
+
+(clipmunk-defcfun ("cpBodyRemoveConstraint" #.(chipmunk-lispify "cpBodyRemoveConstraint" 'function)) :void
+  (body :pointer)
+  (constraint :pointer))
+
+(clipmunk-defcfun ("cpClosetPointOnSegment" #.(chipmunk-lispify "cpClosetPointOnSegment" 'function)) :pointer
+  (p :pointer)
+  (a :pointer)
+  (b :pointer))
+
+(clipmunk-defcfun ("cpShapeInit" #.(chipmunk-lispify "cpShapeInit" 'function)) :pointer
+  (shape :pointer)
+  (klass :pointer)
+  (body :pointer))
+
+(clipmunk-defcfun ("cpShapeActive" #.(chipmunk-lispify "cpShapeActive" 'function)) :int
+  (shape :pointer))
+
+(clipmunk-defcfun ("cpCollideShapes" #.(chipmunk-lispify "cpCollideShapes" 'function)) :int
+  (a :pointer)
+  (b :pointer)
+  (arr :pointer))
+
+(clipmunk-defcfun ("cpSplittingPlaneNew" #.(chipmunk-lispify "cpSplittingPlaneNew" 'function)) :pointer
+  (a :pointer)
+  (b :pointer))
+
+(clipmunk-defcfun ("cpSplittingPlaneCompare" #.(chipmunk-lispify "cpSplittingPlaneCompare" 'function)) :double
+  (plane :pointer)
+  (v :pointer))
+
+(clipmunk-defcfun ("cpLoopIndexes" #.(chipmunk-lispify "cpLoopIndexes" 'function)) :void
+  (verts :pointer)
+  (count :int)
+  (start :pointer)
+  (end :pointer))
+
+(clipmunk-defcfun ("cpSpatialIndexInit" #.(chipmunk-lispify "cpSpatialIndexInit" 'function)) :pointer
+  (index :pointer)
+  (klass :pointer)
+  (bbfunc :pointer)
+  (staticIndex :pointer))
+
+(cffi:defcvar ("cpDefaultCollisionHandler" #.(chipmunk-lispify "cpDefaultCollisionHandler" 'variable))
+ :pointer)
+
+(clipmunk-defcfun ("cpSpaceProcessComponents" #.(chipmunk-lispify "cpSpaceProcessComponents" 'function)) :void
+  (space :pointer)
+  (dt :double))
+
+(clipmunk-defcfun ("cpSpacePushFreshContactBuffer" #.(chipmunk-lispify "cpSpacePushFreshContactBuffer" 'function)) :void
+  (space :pointer))
+
+(clipmunk-defcfun ("cpContactBufferGetArray" #.(chipmunk-lispify "cpContactBufferGetArray" 'function)) :pointer
+  (space :pointer))
+
+(clipmunk-defcfun ("cpSpacePushContacts" #.(chipmunk-lispify "cpSpacePushContacts" 'function)) :void
+  (space :pointer)
+  (count :int))
+
+(clipmunk-defcfun ("cpSpaceGetPostStepData" #.(chipmunk-lispify "cpSpaceGetPostStepData" 'function)) :pointer
+  (space :pointer)
+  (key :pointer))
+
+(clipmunk-defcfun ("cpSpaceArbiterSetFilter" #.(chipmunk-lispify "cpSpaceArbiterSetFilter" 'function)) :int
+  (arb :pointer)
+  (space :pointer))
+
+(clipmunk-defcfun ("cpSpaceFilterArbiters" #.(chipmunk-lispify "cpSpaceFilterArbiters" 'function)) :void
+  (space :pointer)
+  (body :pointer)
+  (filter :pointer))
+
+(clipmunk-defcfun ("cpSpaceActivateBody" #.(chipmunk-lispify "cpSpaceActivateBody" 'function)) :void
+  (space :pointer)
+  (body :pointer))
+
+(clipmunk-defcfun ("cpSpaceLock" #.(chipmunk-lispify "cpSpaceLock" 'function)) :void
+  (space :pointer))
+
+(clipmunk-defcfun ("cpSpaceUnlock" #.(chipmunk-lispify "cpSpaceUnlock" 'function)) :void
+  (space :pointer)
+  (runPostStep :int))
+
+(clipmunk-defcfun ("cpSpaceLookupHandler" #.(chipmunk-lispify "cpSpaceLookupHandler" 'function)) :pointer
+  (space :pointer)
+  (a :pointer)
+  (b :pointer))
+
+(clipmunk-defcfun ("cpSpaceUncacheArbiter" #.(chipmunk-lispify "cpSpaceUncacheArbiter" 'function)) :void
+  (space :pointer)
+  (arb :pointer))
+
+(clipmunk-defcfun ("cpShapeUpdateFunc" #.(chipmunk-lispify "cpShapeUpdateFunc" 'function)) :void
+  (shape :pointer)
+  (unused :pointer))
+
+(clipmunk-defcfun ("cpSpaceCollideShapes" #.(chipmunk-lispify "cpSpaceCollideShapes" 'function)) :void
+  (a :pointer)
+  (b :pointer)
+  (space :pointer))
+
+(clipmunk-defcstruct #.(chipmunk-lispify "cpContact" 'classname)
+	(#.(chipmunk-lispify "p" 'slotname) :pointer)
+	(#.(chipmunk-lispify "n" 'slotname) :pointer)
+	(#.(chipmunk-lispify "dist" 'slotname) :double)
+	(#.(chipmunk-lispify "r1" 'slotname) :pointer)
+	(#.(chipmunk-lispify "r2" 'slotname) :pointer)
+	(#.(chipmunk-lispify "nMass" 'slotname) :double)
+	(#.(chipmunk-lispify "tMass" 'slotname) :double)
+	(#.(chipmunk-lispify "bounce" 'slotname) :double)
+	(#.(chipmunk-lispify "jnAcc" 'slotname) :double)
+	(#.(chipmunk-lispify "jtAcc" 'slotname) :double)
+	(#.(chipmunk-lispify "jBias" 'slotname) :double)
+	(#.(chipmunk-lispify "bias" 'slotname) :double)
+	(#.(chipmunk-lispify "hash" 'slotname) :pointer))
+
+(clipmunk-defcfun ("cpContactInit" #.(chipmunk-lispify "cpContactInit" 'function)) :pointer
+  (con :pointer)
+  (p :pointer)
+  (n :pointer)
+  (dist :double)
+  (hash :pointer))
+
+(clipmunk-defcfun ("cpArbiterInit" #.(chipmunk-lispify "cpArbiterInit" 'function)) :pointer
+  (arb :pointer)
+  (a :pointer)
+  (b :pointer))
+
+(clipmunk-defcfun ("cpArbiterCallSeparate" #.(chipmunk-lispify "cpArbiterCallSeparate" 'function)) :void
+  (arb :pointer)
+  (space :pointer))
+
+(clipmunk-defcfun ("cpArbiterThreadForBody" #.(chipmunk-lispify "cpArbiterThreadForBody" 'function)) :pointer
+  (arb :pointer)
+  (body :pointer))
+
+(clipmunk-defcfun ("cpArbiterUnthread" #.(chipmunk-lispify "cpArbiterUnthread" 'function)) :void
+  (arb :pointer))
+
+(clipmunk-defcfun ("cpArbiterUpdate" #.(chipmunk-lispify "cpArbiterUpdate" 'function)) :void
+  (arb :pointer)
+  (contacts :pointer)
+  (numContacts :int)
+  (handler :pointer)
+  (a :pointer)
+  (b :pointer))
+
+(clipmunk-defcfun ("cpArbiterPreStep" #.(chipmunk-lispify "cpArbiterPreStep" 'function)) :void
+  (arb :pointer)
+  (dt :double)
+  (bias :double)
+  (slop :double))
+
+(clipmunk-defcfun ("cpArbiterApplyCachedImpulse" #.(chipmunk-lispify "cpArbiterApplyCachedImpulse" 'function)) :void
+  (arb :pointer)
+  (dt_coef :double))
+
+(clipmunk-defcfun ("cpArbiterApplyImpulse" #.(chipmunk-lispify "cpArbiterApplyImpulse" 'function)) :void
+  (arb :pointer))
 
 (clipmunk-defcfun ("cpMessage" #.(chipmunk-lispify "cpMessage" 'function)) :void
   (condition :string)
@@ -179,13 +426,13 @@
 	(#.(chipmunk-lispify "data" 'slotname) :pointer)
 	(#.(chipmunk-lispify "v_limit" 'slotname) :double)
 	(#.(chipmunk-lispify "w_limit" 'slotname) :double)
-	(v_bias_private-x :double) (v_bias_private-y :double)
-	(#.(chipmunk-lispify "w_bias_private" 'slotname) :double)
-	(#.(chipmunk-lispify "space_private" 'slotname) :pointer)
-	(#.(chipmunk-lispify "shapeList_private" 'slotname) :pointer)
-	(#.(chipmunk-lispify "arbiterList_private" 'slotname) :pointer)
-	(#.(chipmunk-lispify "constraintList_private" 'slotname) :pointer)
-	(#.(chipmunk-lispify "node_private" 'slotname) #.(chipmunk-lispify "cpComponentNode" 'classname)))
+	(v_bias-x :double) (v_bias-y :double)
+	(#.(chipmunk-lispify "w_bias" 'slotname) :double)
+	(#.(chipmunk-lispify "space" 'slotname) :pointer)
+	(#.(chipmunk-lispify "shapeList" 'slotname) :pointer)
+	(#.(chipmunk-lispify "arbiterList" 'slotname) :pointer)
+	(#.(chipmunk-lispify "constraintList" 'slotname) :pointer)
+	(#.(chipmunk-lispify "node" 'slotname) #.(chipmunk-lispify "cpComponentNode" 'classname)))
 
 (clipmunk-defcfun ("cpBodyAlloc" #.(chipmunk-lispify "cpBodyAlloc" 'function)) :pointer)
 
@@ -370,7 +617,7 @@
 	(#.(chipmunk-lispify "segmentQuery" 'slotname) :pointer))
 
 (clipmunk-defcstruct #.(chipmunk-lispify "cpShape" 'classname)
-	(#.(chipmunk-lispify "klass_private" 'slotname) :pointer)
+	(#.(chipmunk-lispify "klass" 'slotname) :pointer)
 	(#.(chipmunk-lispify "body" 'slotname) :pointer)
 	(#.(chipmunk-lispify "bb" 'slotname) #.(chipmunk-lispify "cpBB" 'classname))
 	(#.(chipmunk-lispify "sensor" 'slotname) :int)
@@ -381,10 +628,10 @@
 	(#.(chipmunk-lispify "collision_type" 'slotname) :pointer)
 	(#.(chipmunk-lispify "group" 'slotname) :pointer)
 	(#.(chipmunk-lispify "layers" 'slotname) :unsigned-int)
-	(#.(chipmunk-lispify "space_private" 'slotname) :pointer)
-	(#.(chipmunk-lispify "next_private" 'slotname) :pointer)
-	(#.(chipmunk-lispify "prev_private" 'slotname) :pointer)
-	(#.(chipmunk-lispify "hashid_private" 'slotname) :pointer))
+	(#.(chipmunk-lispify "space" 'slotname) :pointer)
+	(#.(chipmunk-lispify "next" 'slotname) :pointer)
+	(#.(chipmunk-lispify "prev" 'slotname) :pointer)
+	(#.(chipmunk-lispify "hashid" 'slotname) :pointer))
 
 (clipmunk-defcfun ("cpShapeDestroy" #.(chipmunk-lispify "cpShapeDestroy" 'function)) :void
   (shape :pointer))
@@ -622,18 +869,18 @@
 	(#.(chipmunk-lispify "e" 'slotname) :double)
 	(#.(chipmunk-lispify "u" 'slotname) :double)
 	(surface_vr-x :double) (surface_vr-y :double)
-	(#.(chipmunk-lispify "a_private" 'slotname) :pointer)
-	(#.(chipmunk-lispify "b_private" 'slotname) :pointer)
-	(#.(chipmunk-lispify "body_a_private" 'slotname) :pointer)
-	(#.(chipmunk-lispify "body_b_private" 'slotname) :pointer)
-	(#.(chipmunk-lispify "thread_a_private" 'slotname) #.(chipmunk-lispify "cpArbiterThread" 'classname))
-	(#.(chipmunk-lispify "thread_b_private" 'slotname) #.(chipmunk-lispify "cpArbiterThread" 'classname))
-	(#.(chipmunk-lispify "numContacts_private" 'slotname) :int)
-	(#.(chipmunk-lispify "contacts_private" 'slotname) :pointer)
-	(#.(chipmunk-lispify "stamp_private" 'slotname) :unsigned-int)
-	(#.(chipmunk-lispify "handler_private" 'slotname) :pointer)
-	(#.(chipmunk-lispify "swappedColl_private" 'slotname) :int)
-	(#.(chipmunk-lispify "state_private" 'slotname) #.(chipmunk-lispify "cpArbiterState" 'enumname)))
+	(#.(chipmunk-lispify "a" 'slotname) :pointer)
+	(#.(chipmunk-lispify "b" 'slotname) :pointer)
+	(#.(chipmunk-lispify "body_a" 'slotname) :pointer)
+	(#.(chipmunk-lispify "body_b" 'slotname) :pointer)
+	(#.(chipmunk-lispify "thread_a" 'slotname) #.(chipmunk-lispify "cpArbiterThread" 'classname))
+	(#.(chipmunk-lispify "thread_b" 'slotname) #.(chipmunk-lispify "cpArbiterThread" 'classname))
+	(#.(chipmunk-lispify "numContacts" 'slotname) :int)
+	(#.(chipmunk-lispify "contacts" 'slotname) :pointer)
+	(#.(chipmunk-lispify "stamp" 'slotname) :unsigned-int)
+	(#.(chipmunk-lispify "handler" 'slotname) :pointer)
+	(#.(chipmunk-lispify "swappedColl" 'slotname) :int)
+	(#.(chipmunk-lispify "state" 'slotname) #.(chipmunk-lispify "cpArbiterState" 'enumname)))
 
 (clipmunk-defcfun ("cpArbiterGetElasticity" #.(chipmunk-lispify "cpArbiterGetElasticity" 'function)) :double
   (arb :pointer))
@@ -701,12 +948,12 @@
 	(#.(chipmunk-lispify "getImpulse" 'slotname) :pointer))
 
 (clipmunk-defcstruct #.(chipmunk-lispify "cpConstraint" 'classname)
-	(#.(chipmunk-lispify "klass_private" 'slotname) :pointer)
+	(#.(chipmunk-lispify "klass" 'slotname) :pointer)
 	(#.(chipmunk-lispify "a" 'slotname) :pointer)
 	(#.(chipmunk-lispify "b" 'slotname) :pointer)
-	(#.(chipmunk-lispify "space_private" 'slotname) :pointer)
-	(#.(chipmunk-lispify "next_a_private" 'slotname) :pointer)
-	(#.(chipmunk-lispify "next_b_private" 'slotname) :pointer)
+	(#.(chipmunk-lispify "space" 'slotname) :pointer)
+	(#.(chipmunk-lispify "next_a" 'slotname) :pointer)
+	(#.(chipmunk-lispify "next_b" 'slotname) :pointer)
 	(#.(chipmunk-lispify "maxForce" 'slotname) :double)
 	(#.(chipmunk-lispify "errorBias" 'slotname) :double)
 	(#.(chipmunk-lispify "maxBias" 'slotname) :double)
@@ -1302,25 +1549,25 @@
 	(#.(chipmunk-lispify "enableContactGraph" 'slotname) :int)
 	(#.(chipmunk-lispify "data" 'slotname) :pointer)
 	(#.(chipmunk-lispify "staticBody" 'slotname) :pointer)
-	(#.(chipmunk-lispify "stamp_private" 'slotname) :unsigned-int)
-	(#.(chipmunk-lispify "curr_dt_private" 'slotname) :double)
-	(#.(chipmunk-lispify "bodies_private" 'slotname) :pointer)
-	(#.(chipmunk-lispify "rousedBodies_private" 'slotname) :pointer)
-	(#.(chipmunk-lispify "sleepingComponents_private" 'slotname) :pointer)
-	(#.(chipmunk-lispify "staticShapes_private" 'slotname) :pointer)
-	(#.(chipmunk-lispify "activeShapes_private" 'slotname) :pointer)
-	(#.(chipmunk-lispify "arbiters_private" 'slotname) :pointer)
-	(#.(chipmunk-lispify "contactBuffersHead_private" 'slotname) :pointer)
-	(#.(chipmunk-lispify "cachedArbiters_private" 'slotname) :pointer)
-	(#.(chipmunk-lispify "pooledArbiters_private" 'slotname) :pointer)
-	(#.(chipmunk-lispify "constraints_private" 'slotname) :pointer)
-	(#.(chipmunk-lispify "allocatedBuffers_private" 'slotname) :pointer)
-	(#.(chipmunk-lispify "locked_private" 'slotname) :int)
-	(#.(chipmunk-lispify "collisionHandlers_private" 'slotname) :pointer)
-	(#.(chipmunk-lispify "defaultHandler_private" 'slotname) #.(chipmunk-lispify "cpCollisionHandler" 'classname))
-	(#.(chipmunk-lispify "skipPostStep_private" 'slotname) :int)
-	(#.(chipmunk-lispify "postStepCallbacks_private" 'slotname) :pointer)
-	(#.(chipmunk-lispify "_staticBody_private" 'slotname) #.(chipmunk-lispify "cpBody" 'classname)))
+	(#.(chipmunk-lispify "stamp" 'slotname) :unsigned-int)
+	(#.(chipmunk-lispify "curr_dt" 'slotname) :double)
+	(#.(chipmunk-lispify "bodies" 'slotname) :pointer)
+	(#.(chipmunk-lispify "rousedBodies" 'slotname) :pointer)
+	(#.(chipmunk-lispify "sleepingComponents" 'slotname) :pointer)
+	(#.(chipmunk-lispify "staticShapes" 'slotname) :pointer)
+	(#.(chipmunk-lispify "activeShapes" 'slotname) :pointer)
+	(#.(chipmunk-lispify "arbiters" 'slotname) :pointer)
+	(#.(chipmunk-lispify "contactBuffersHead" 'slotname) :pointer)
+	(#.(chipmunk-lispify "cachedArbiters" 'slotname) :pointer)
+	(#.(chipmunk-lispify "pooledArbiters" 'slotname) :pointer)
+	(#.(chipmunk-lispify "constraints" 'slotname) :pointer)
+	(#.(chipmunk-lispify "allocatedBuffers" 'slotname) :pointer)
+	(#.(chipmunk-lispify "locked" 'slotname) :int)
+	(#.(chipmunk-lispify "collisionHandlers" 'slotname) :pointer)
+	(#.(chipmunk-lispify "defaultHandler" 'slotname) #.(chipmunk-lispify "cpCollisionHandler" 'classname))
+	(#.(chipmunk-lispify "skipPostStep" 'slotname) :int)
+	(#.(chipmunk-lispify "postStepCallbacks" 'slotname) :pointer)
+	(#.(chipmunk-lispify "_staticBody" 'slotname) #.(chipmunk-lispify "cpBody" 'classname)))
 
 (clipmunk-defcfun ("cpSpaceAlloc" #.(chipmunk-lispify "cpSpaceAlloc" 'function)) :pointer)
 

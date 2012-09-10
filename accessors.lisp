@@ -25,3 +25,4 @@
 ;(make-accessors clipmunk:constraint)
 (make-accessors clipmunk:collision-handler)
 (make-accessors clipmunk:space)
+(make-accessors clipmunk:contact)
