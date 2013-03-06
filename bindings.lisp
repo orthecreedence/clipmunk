@@ -171,7 +171,12 @@
   (space :pointer)
   (count :int))
 
-(clipmunk-defcfun ("cpSpaceGetPostStepData" #.(chipmunk-lispify "cpSpaceGetPostStepData" 'function)) :pointer
+(clipmunk-defcstruct #.(chipmunk-lispify "cpPostStepCallback" 'classname)
+	(#.(chipmunk-lispify "func" 'slotname) :pointer)
+	(#.(chipmunk-lispify "key" 'slotname) :pointer)
+	(#.(chipmunk-lispify "data" 'slotname) :pointer))
+
+(clipmunk-defcfun ("cpSpaceGetPostStepCallback" #.(chipmunk-lispify "cpSpaceGetPostStepCallback" 'function)) :pointer
   (space :pointer)
   (key :pointer))
 
@@ -287,12 +292,14 @@
 
 (cl:defconstant #.(chipmunk-lispify "CP_VERSION_MINOR" 'constant) 1)
 
-(cl:defconstant #.(chipmunk-lispify "CP_VERSION_RELEASE" 'constant) 1)
+(cl:defconstant #.(chipmunk-lispify "CP_VERSION_RELEASE" 'constant) 3)
 
 (cffi:defcvar ("cpVersionString" #.(chipmunk-lispify "cpVersionString" 'variable))
  :string)
 
 (clipmunk-defcfun ("cpInitChipmunk" #.(chipmunk-lispify "cpInitChipmunk" 'function)) :void)
+
+(clipmunk-defcfun ("cpEnableSegmentToSegmentCollisions" #.(chipmunk-lispify "cpEnableSegmentToSegmentCollisions" 'function)) :void)
 
 (clipmunk-defcfun ("cpAreaForCircle" #.(chipmunk-lispify "cpAreaForCircle" 'function)) :double
   (r1 :double)
@@ -348,13 +355,29 @@
 	(#.(chipmunk-lispify "x" 'slotname) :double)
 	(#.(chipmunk-lispify "y" 'slotname) :double))
 
-(clipmunk-defcfun ("cpvlength" #.(chipmunk-lispify "cpvlength" 'function)) :double
+(clipmunk-defcstruct #.(chipmunk-lispify "cpMat2x2" 'classname)
+	(#.(chipmunk-lispify "a" 'slotname) :double)
+	(#.(chipmunk-lispify "b" 'slotname) :double)
+	(#.(chipmunk-lispify "c" 'slotname) :double)
+	(#.(chipmunk-lispify "d" 'slotname) :double))
+
+(clipmunk-defcfun ("cpvstr" #.(chipmunk-lispify "cpvstr" 'function)) :string
   (v-x :double) (v-y :double))
 
 (clipmunk-defcfun ("cpvtoangle" #.(chipmunk-lispify "cpvtoangle" 'function)) :double
   (v-x :double) (v-y :double))
 
-(clipmunk-defcfun ("cpvstr" #.(chipmunk-lispify "cpvstr" 'function)) :string
+(clipmunk-defcfun ("cpvlength" #.(chipmunk-lispify "cpvlength" 'function)) :double
+  (v-x :double) (v-y :double))
+
+(clipmunk-defcfun ("cpMat2x2New" #.(chipmunk-lispify "cpMat2x2New" 'function)) #.(chipmunk-lispify "cpMat2x2" 'classname)
+  (a :double)
+  (b :double)
+  (c :double)
+  (d :double))
+
+(clipmunk-defcfun ("cpMat2x2Transform" #.(chipmunk-lispify "cpMat2x2Transform" 'function)) #.(chipmunk-lispify "cpVect" 'classname)
+  (m #.(chipmunk-lispify "cpMat2x2" 'classname))
   (v-x :double) (v-y :double))
 
 (clipmunk-defcstruct #.(chipmunk-lispify "cpBB" 'classname)
@@ -869,6 +892,7 @@
 	(#.(chipmunk-lispify "e" 'slotname) :double)
 	(#.(chipmunk-lispify "u" 'slotname) :double)
 	(surface_vr-x :double) (surface_vr-y :double)
+	(#.(chipmunk-lispify "data" 'slotname) :pointer)
 	(#.(chipmunk-lispify "a" 'slotname) :pointer)
 	(#.(chipmunk-lispify "b" 'slotname) :pointer)
 	(#.(chipmunk-lispify "body_a" 'slotname) :pointer)
@@ -902,6 +926,13 @@
 (clipmunk-defcfun ("cpArbiterSetSurfaceVelocity" #.(chipmunk-lispify "cpArbiterSetSurfaceVelocity" 'function)) :void
   (arb :pointer)
   (value-x :double) (value-y :double))
+
+(clipmunk-defcfun ("cpArbiterGetUserData" #.(chipmunk-lispify "cpArbiterGetUserData" 'function)) :pointer
+  (arb :pointer))
+
+(clipmunk-defcfun ("cpArbiterSetUserData" #.(chipmunk-lispify "cpArbiterSetUserData" 'function)) :void
+  (arb :pointer)
+  (value :pointer))
 
 (clipmunk-defcfun ("cpArbiterTotalKE" #.(chipmunk-lispify "cpArbiterTotalKE" 'function)) :double
   (arb :pointer))
@@ -1034,7 +1065,8 @@
 	(#.(chipmunk-lispify "springTorqueFunc" 'slotname) :pointer)
 	(#.(chipmunk-lispify "target_wrn" 'slotname) :double)
 	(#.(chipmunk-lispify "w_coef" 'slotname) :double)
-	(#.(chipmunk-lispify "iSum" 'slotname) :double))
+	(#.(chipmunk-lispify "iSum" 'slotname) :double)
+	(#.(chipmunk-lispify "jAcc" 'slotname) :double))
 
 (clipmunk-defcfun ("cpDampedRotarySpringAlloc" #.(chipmunk-lispify "cpDampedRotarySpringAlloc" 'function)) :pointer)
 
@@ -1096,7 +1128,8 @@
 	(r1-x :double) (r1-y :double)
 	(r2-x :double) (r2-y :double)
 	(#.(chipmunk-lispify "nMass" 'slotname) :double)
-	(n-x :double) (n-y :double))
+	(n-x :double) (n-y :double)
+	(#.(chipmunk-lispify "jAcc" 'slotname) :double))
 
 (clipmunk-defcfun ("cpDampedSpringAlloc" #.(chipmunk-lispify "cpDampedSpringAlloc" 'function)) :pointer)
 
@@ -1170,8 +1203,7 @@
 	(#.(chipmunk-lispify "ratio_inv" 'slotname) :double)
 	(#.(chipmunk-lispify "iSum" 'slotname) :double)
 	(#.(chipmunk-lispify "bias" 'slotname) :double)
-	(#.(chipmunk-lispify "jAcc" 'slotname) :double)
-	(#.(chipmunk-lispify "jMax" 'slotname) :double))
+	(#.(chipmunk-lispify "jAcc" 'slotname) :double))
 
 (clipmunk-defcfun ("cpGearJointAlloc" #.(chipmunk-lispify "cpGearJointAlloc" 'function)) :pointer)
 
@@ -1214,10 +1246,8 @@
 	(#.(chipmunk-lispify "clamp" 'slotname) :double)
 	(r1-x :double) (r1-y :double)
 	(r2-x :double) (r2-y :double)
-	(k1-x :double) (k1-y :double)
-	(k2-x :double) (k2-y :double)
+	(#.(chipmunk-lispify "k" 'slotname) #.(chipmunk-lispify "cpMat2x2" 'classname))
 	(jAcc-x :double) (jAcc-y :double)
-	(#.(chipmunk-lispify "jMaxLen" 'slotname) :double)
 	(bias-x :double) (bias-y :double))
 
 (clipmunk-defcfun ("cpGrooveJointAlloc" #.(chipmunk-lispify "cpGrooveJointAlloc" 'function)) :pointer)
@@ -1270,7 +1300,6 @@
 	(n-x :double) (n-y :double)
 	(#.(chipmunk-lispify "nMass" 'slotname) :double)
 	(#.(chipmunk-lispify "jnAcc" 'slotname) :double)
-	(#.(chipmunk-lispify "jnMax" 'slotname) :double)
 	(#.(chipmunk-lispify "bias" 'slotname) :double))
 
 (clipmunk-defcfun ("cpPinJointAlloc" #.(chipmunk-lispify "cpPinJointAlloc" 'function)) :pointer)
@@ -1317,10 +1346,8 @@
 	(anchr2-x :double) (anchr2-y :double)
 	(r1-x :double) (r1-y :double)
 	(r2-x :double) (r2-y :double)
-	(k1-x :double) (k1-y :double)
-	(k2-x :double) (k2-y :double)
+	(#.(chipmunk-lispify "k" 'slotname) #.(chipmunk-lispify "cpMat2x2" 'classname))
 	(jAcc-x :double) (jAcc-y :double)
-	(#.(chipmunk-lispify "jMaxLen" 'slotname) :double)
 	(bias-x :double) (bias-y :double))
 
 (clipmunk-defcfun ("cpPivotJointAlloc" #.(chipmunk-lispify "cpPivotJointAlloc" 'function)) :pointer)
@@ -1366,8 +1393,7 @@
 	(#.(chipmunk-lispify "ratchet" 'slotname) :double)
 	(#.(chipmunk-lispify "iSum" 'slotname) :double)
 	(#.(chipmunk-lispify "bias" 'slotname) :double)
-	(#.(chipmunk-lispify "jAcc" 'slotname) :double)
-	(#.(chipmunk-lispify "jMax" 'slotname) :double))
+	(#.(chipmunk-lispify "jAcc" 'slotname) :double))
 
 (clipmunk-defcfun ("cpRatchetJointAlloc" #.(chipmunk-lispify "cpRatchetJointAlloc" 'function)) :pointer)
 
@@ -1413,8 +1439,7 @@
 	(#.(chipmunk-lispify "max" 'slotname) :double)
 	(#.(chipmunk-lispify "iSum" 'slotname) :double)
 	(#.(chipmunk-lispify "bias" 'slotname) :double)
-	(#.(chipmunk-lispify "jAcc" 'slotname) :double)
-	(#.(chipmunk-lispify "jMax" 'slotname) :double))
+	(#.(chipmunk-lispify "jAcc" 'slotname) :double))
 
 (clipmunk-defcfun ("cpRotaryLimitJointAlloc" #.(chipmunk-lispify "cpRotaryLimitJointAlloc" 'function)) :pointer)
 
@@ -1451,8 +1476,7 @@
 	(#.(chipmunk-lispify "constraint" 'slotname) #.(chipmunk-lispify "cpConstraint" 'classname))
 	(#.(chipmunk-lispify "rate" 'slotname) :double)
 	(#.(chipmunk-lispify "iSum" 'slotname) :double)
-	(#.(chipmunk-lispify "jAcc" 'slotname) :double)
-	(#.(chipmunk-lispify "jMax" 'slotname) :double))
+	(#.(chipmunk-lispify "jAcc" 'slotname) :double))
 
 (clipmunk-defcfun ("cpSimpleMotorAlloc" #.(chipmunk-lispify "cpSimpleMotorAlloc" 'function)) :pointer)
 
@@ -1487,7 +1511,6 @@
 	(n-x :double) (n-y :double)
 	(#.(chipmunk-lispify "nMass" 'slotname) :double)
 	(#.(chipmunk-lispify "jnAcc" 'slotname) :double)
-	(#.(chipmunk-lispify "jnMax" 'slotname) :double)
 	(#.(chipmunk-lispify "bias" 'slotname) :double))
 
 (clipmunk-defcfun ("cpSlideJointAlloc" #.(chipmunk-lispify "cpSlideJointAlloc" 'function)) :pointer)
@@ -1728,7 +1751,7 @@
   (space :pointer)
   (constraint :pointer))
 
-(clipmunk-defcfun ("cpSpaceAddPostStepCallback" #.(chipmunk-lispify "cpSpaceAddPostStepCallback" 'function)) :void
+(clipmunk-defcfun ("cpSpaceAddPostStepCallback" #.(chipmunk-lispify "cpSpaceAddPostStepCallback" 'function)) :int
   (space :pointer)
   (func :pointer)
   (key :pointer)
