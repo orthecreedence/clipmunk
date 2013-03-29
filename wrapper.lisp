@@ -53,6 +53,12 @@
           (t
            (intern str)))))
 
+(defmacro cffi-type (type)
+  (if (asdf:version-satisfies (asdf:find-system :cffi) "0.11.0")
+      `(list :struct ,type)
+      type))
+
+;; TODO: remove?? is this even used?
 (defun get-cffi-type (val)
   (if (keywordp val)
        val
